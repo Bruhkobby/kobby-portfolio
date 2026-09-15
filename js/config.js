@@ -13,8 +13,8 @@
    NEVER put your service_role key in any frontend file.
    ============================================================ */
 
-const SUPABASE_URL = "";      // <-- e.g. "https://abcdefgh.supabase.co"
-const SUPABASE_ANON_KEY = ""; // <-- e.g. "eyJhbGciOiJIUzI1NiIsInR5..."
+const SUPABASE_URL = "https://ixubjyxegefvpgdickac.supabase.co";      // <-- e.g. "https://abcdefgh.supabase.co"
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dWJqeXhlZ2VmdnBnZGlja2FjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NzU0NjMsImV4cCI6MjEwNTA1MTQ2M30.q60T03z8fR74dDNKA1JlsmTAESUQ8S858XGu82wGabQ"; // <-- e.g. "eyJhbGciOiJIUzI1NiIsInR5..."
 
 /* ------------------------------------------------------------
    Storage bucket used for project image uploads.
