@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobby — Graphic Designer &amp; Multimedia Creative</title>
+  <meta name="description" content="Visual design, branding and digital experiences crafted with intention." />
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body class="page">
+
+  <!-- ============ NAVIGATION ============ -->
+  <header class="site-header" id="siteHeader">
+    <a class="brand" href="index.html">KOBBY<span class="brand-mark">®</span></a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="portfolio.html" data-nav>Work</a>
+      <a href="about.html" data-nav>About</a>
+      <a href="services.html" data-nav>Services</a>
+      <a href="contact.html" data-nav>Contact</a>
+    </nav>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <nav aria-label="Mobile">
+      <a href="portfolio.html"><span>01</span>Work</a>
+      <a href="about.html"><span>02</span>About</a>
+      <a href="services.html"><span>03</span>Services</a>
+      <a href="contact.html"><span>04</span>Contact</a>
+    </nav>
+    <div class="mobile-menu-footer">
+      <a href="mailto:hello@kobby.design">hello@kobby.design</a>
+      <a href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a>
+    </div>
+  </div>
+
+  <main id="pageContent">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="hero-kicker" data-hero-reveal>Portfolio — 2026</p>
+        <h1 class="hero-title">
+          <span class="hero-line" data-hero-reveal>KOBBY</span>
+          <span class="hero-line hero-line-sub" data-hero-reveal>Graphic Designer</span>
+          <span class="hero-line hero-line-sub" data-hero-reveal>&amp; Multimedia Creative</span>
+        </h1>
+        <!-- EDIT ME: your one-line intro statement -->
+        <p class="hero-statement" data-hero-reveal>Visual design, branding and digital experiences crafted with intention.</p>
+      </div>
+      <div class="hero-scroll" data-hero-reveal>
+        <span class="hero-scroll-line"></span>
+        <span class="hero-scroll-text">Scroll</span>
+      </div>
+    </section>
+
+    <!-- ============ FEATURED PROJECT (filled by js/portfolio.js) ============ -->
+    <section class="featured section" id="featured-section">
+      <div class="section-head" data-reveal>
+        <span class="section-label">Featured Project</span>
+        <span class="section-rule"></span>
+      </div>
+      <div id="featured-project" class="featured-wrap">
+        <p class="loading-note">Loading featured project…</p>
+      </div>
+    </section>
+
+    <!-- ============ SELECTED WORK ============ -->
+    <section class="section selected-work">
+      <div class="section-head" data-reveal>
+        <span class="section-label">Selected Work</span>
+        <span class="section-rule"></span>
+        <a class="section-link" href="portfolio.html">View all work →</a>
+      </div>
+      <div id="selected-work" class="work-preview">
+        <p class="loading-note">Loading projects…</p>
+      </div>
+    </section>
+
+    <!-- ============ SERVICES TEASER ============ -->
+    <section class="section services-teaser">
+      <div class="section-head" data-reveal>
+        <span class="section-label">What I Do</span>
+        <span class="section-rule"></span>
+        <a class="section-link" href="services.html">All services →</a>
+      </div>
+      <!-- EDIT ME: shortlist of your services -->
+      <div class="services-rows">
+        <a class="service-row" href="services.html" data-reveal>
+          <span class="service-num">01</span>
+          <span class="service-name">Graphic Design</span>
+          <span class="service-desc">Posters, flyers, editorial layouts and visual campaigns.</span>
+        </a>
+        <a class="service-row" href="services.html" data-reveal>
+          <span class="service-num">02</span>
+          <span class="service-name">Brand Identity</span>
+          <span class="service-desc">Logos, brand systems and identities built to last.</span>
+        </a>
+        <a class="service-row" href="services.html" data-reveal>
+          <span class="service-num">03</span>
+          <span class="service-name">Social Media Design</span>
+          <span class="service-desc">Feed grids, campaign visuals and content that converts.</span>
+        </a>
+        <a class="service-row" href="services.html" data-reveal>
+          <span class="service-num">04</span>
+          <span class="service-name">UI/UX Design</span>
+          <span class="service-desc">Clean, intuitive interfaces designed in Figma.</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============ STATEMENT / ABOUT TEASER ============ -->
+    <section class="section statement">
+      <!-- EDIT ME: your creative philosophy in one or two sentences -->
+      <p class="statement-text" data-reveal>
+        I believe good design is <em>quiet confidence</em> —
+        every colour, grid and frame placed with purpose,
+        so the message speaks before the decoration does.
+      </p>
+      <a class="btn-outline" href="about.html" data-reveal>More about me</a>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="footer-cta">
+      <p class="footer-kicker" data-reveal>Have a project in mind?</p>
+      <h2 class="footer-title" data-reveal><a href="contact.html">Let's create something<span class="cta-arrow">→</span></a></h2>
+    </div>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <a class="footer-brand" href="index.html">KOBBY®</a>
+        <p>Graphic Designer<br />&amp; Multimedia Creative</p>
+      </div>
+      <!-- EDIT ME: your real contact details -->
+      <div class="footer-col">
+        <h3>Contact</h3>
+        <a href="mailto:hello@kobby.design">hello@kobby.design</a>
+        <a href="tel:+233000000000">+233 00 000 0000</a>
+      </div>
+      <div class="footer-col">
+        <h3>Social</h3>
+        <a href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://behance.net/" target="_blank" rel="noopener">Behance</a>
+        <a href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+      <div class="footer-col">
+        <h3>Menu</h3>
+        <a href="portfolio.html">Work</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span data-year></span> Kobby. All rights reserved.</span>
+      <span>Designed &amp; built with intention.</span>
+    </div>
+  </footer>
+
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/demo-data.js" defer></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/animations.js" defer></script>
+  <script src="js/portfolio.js" defer></script>
+</body>
+</html>

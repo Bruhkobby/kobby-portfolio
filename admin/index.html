@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in — Portfolio CMS</title>
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body data-admin="login">
+
+  <main class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <span class="auth-logo">CMS</span>
+        <h1>Portfolio Admin</h1>
+        <p>Sign in to manage your projects.</p>
+      </div>
+
+      <div class="alert alert-warn" id="notConfigured" hidden>
+        Supabase is not configured yet. Add your Project URL and anon key in
+        <code>js/config.js</code>, then reload this page. See the README for setup steps.
+      </div>
+
+      <form id="loginForm" autocomplete="on">
+        <label class="field">
+          <span>Email</span>
+          <input type="email" id="email" name="email" required autocomplete="email" placeholder="you@example.com" />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
+        </label>
+        <div class="alert alert-error" id="loginError" hidden></div>
+        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Sign in</button>
+      </form>
+
+      <p class="auth-note">Only the admin account created in your Supabase dashboard can sign in.</p>
+      <a class="auth-back" href="../index.html">← Back to website</a>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="../js/config.js" defer></script>
+  <script src="admin.js" defer></script>
+</body>
+</html>

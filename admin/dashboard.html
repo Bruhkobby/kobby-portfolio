@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Portfolio CMS</title>
+  <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body data-admin="dashboard">
+
+  <!-- ============ TOP BAR ============ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">CMS</span>
+      <h1 class="topbar-title">Portfolio Admin</h1>
+    </div>
+    <div class="topbar-right">
+      <span class="user-email" id="userEmail"></span>
+      <button class="btn btn-primary" id="newProjectBtn">+ New Project</button>
+      <button class="btn btn-ghost" id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+
+    <!-- Banner when Supabase is not configured -->
+    <div class="alert alert-warn" id="notConfigured" hidden>
+      Supabase is not configured yet. Add your Project URL and anon key in
+      <code>js/config.js</code>, then reload this page. See the README for setup steps.
+    </div>
+
+    <!-- ============ PROJECT LIST ============ -->
+    <section id="listView">
+      <div class="list-head">
+        <h2>Projects <span class="count-badge" id="projectCount">0</span></h2>
+        <p class="list-hint">Published projects appear on the public website automatically. Drag-free reordering: use the ↑ ↓ buttons.</p>
+      </div>
+      <div class="project-table" id="projectList">
+        <p class="muted">Loading projects…</p>
+      </div>
+    </section>
+
+    <!-- ============ EDITOR ============ -->
+    <section id="editorView" hidden>
+      <div class="editor-head">
+        <button class="btn btn-ghost" id="backToList">← Back to list</button>
+        <h2 id="editorTitle">New Project</h2>
+      </div>
+
+      <div class="editor-grid">
+        <!-- Text fields -->
+        <form id="projectForm" class="card">
+          <div class="field-row">
+            <label class="field">
+              <span>Title *</span>
+              <input type="text" id="fTitle" required placeholder="e.g. Food Brand Identity" />
+            </label>
+            <label class="field">
+              <span>Slug (URL) — leave as generated</span>
+              <input type="text" id="fSlug" placeholder="food-brand-identity" />
+            </label>
+          </div>
+          <div class="field-row field-row-3">
+            <label class="field">
+              <span>Category *</span>
+              <select id="fCategory">
+                <option>Branding</option>
+                <option>Social Media</option>
+                <option>Flyers</option>
+                <option>Posters</option>
+                <option>UI/UX</option>
+                <option>Photo Editing</option>
+                <option>Motion</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Client</span>
+              <input type="text" id="fClient" placeholder="e.g. Ember & Oak" />
+            </label>
+            <label class="field">
+              <span>Year</span>
+              <input type="text" id="fYear" placeholder="e.g. 2026" maxlength="10" />
+            </label>
+          </div>
+          <label class="field">
+            <span>Client Brief</span>
+            <textarea id="fBrief" rows="3" placeholder="What did the client want?"></textarea>
+          </label>
+          <label class="field">
+            <span>Objective</span>
+            <textarea id="fObjective" rows="3" placeholder="What should the design achieve?"></textarea>
+          </label>
+          <label class="field">
+            <span>Creative Direction</span>
+            <textarea id="fCreative" rows="3" placeholder="Describe the visual approach."></textarea>
+          </label>
+          <label class="field">
+            <span>Design Process</span>
+            <textarea id="fProcess" rows="3" placeholder="How did you get to the final result?"></textarea>
+          </label>
+          <label class="field">
+            <span>Result / Outcome</span>
+            <textarea id="fResult" rows="3" placeholder="What was the final result?"></textarea>
+          </label>
+          <div class="field-checks">
+            <label class="check">
+              <input type="checkbox" id="fFeatured" />
+              <span>Featured project (shown large on the homepage)</span>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="fPublished" />
+              <span>Published (visible on the public website)</span>
+            </label>
+          </div>
+          <div class="alert alert-error" id="formError" hidden></div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="saveBtn">Save Project</button>
+            <span class="muted" id="saveStatus"></span>
+          </div>
+        </form>
+
+        <!-- Image manager -->
+        <aside class="card images-card">
+          <h3>Project Images</h3>
+          <p class="muted small" id="imagesHint">Upload the cover first — the first image is used as the project cover.</p>
+          <input type="file" id="imageInput" accept="image/*" multiple hidden />
+          <button class="btn btn-secondary btn-block" id="addImagesBtn" type="button" disabled>Upload images</button>
+          <div class="images-list" id="imagesList">
+            <p class="muted small">Save the project first to upload images.</p>
+          </div>
+          <div class="upload-status" id="uploadStatus"></div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="../js/config.js" defer></script>
+  <script src="admin.js" defer></script>
+</body>
+</html>

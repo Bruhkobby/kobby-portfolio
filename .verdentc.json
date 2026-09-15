@@ -1,0 +1,8 @@
+{
+  "deploy": {
+    "type": "static",
+    "rootDir": ".",
+    "outputDir": ".",
+    "entryFile": "index.html"
+  }
+}

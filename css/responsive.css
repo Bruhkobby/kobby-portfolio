@@ -1,0 +1,95 @@
+/* ============================================================
+   KOBBY — Portfolio
+   Responsive styles (tablet + mobile)
+   Breakpoints: 1024px / 768px / 560px
+   ============================================================ */
+
+/* ---------- Tablet & small laptop ---------- */
+@media (max-width: 1024px) {
+
+  .work-preview .project-card:nth-child(1) { grid-column: 1 / span 8; }
+  .work-preview .project-card:nth-child(2) { grid-column: 8 / span 5; margin-top: 4rem; }
+  .work-preview .project-card:nth-child(3) { grid-column: 2 / span 7; }
+
+  .work-grid .project-card.c-0 { grid-column: 1 / span 7; }
+  .work-grid .project-card.c-1 { grid-column: 8 / span 5; }
+  .work-grid .project-card.c-2 { grid-column: 1 / span 6; }
+  .work-grid .project-card.c-3 { grid-column: 7 / span 6; }
+
+  .case-section { grid-template-columns: 1fr; gap: 1rem; }
+  .case-gallery .frame.tall { max-width: 80%; }
+
+  .about-intro { grid-template-columns: 1fr; gap: 2rem; }
+  .about-cols { grid-template-columns: 1fr 1fr; }
+
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2.2rem; }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 768px) {
+
+  /* Navigation collapses to hamburger */
+  .site-nav { display: none; }
+  .menu-toggle { display: flex; }
+
+  .section { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+
+  /* Hero fills the phone screen with deliberate type scale */
+  .hero { padding-bottom: 4.5rem; }
+  .hero-scroll { display: none; }
+  .hero-statement { margin-top: 2rem; }
+
+  /* Single-column stacked grid — deliberate mobile layout */
+  .work-preview { grid-template-columns: 1fr; gap: 2.6rem; }
+  .work-preview .project-card:nth-child(1),
+  .work-preview .project-card:nth-child(2),
+  .work-preview .project-card:nth-child(3) {
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+
+  .work-grid { grid-template-columns: 1fr; gap: 2.6rem; }
+  .work-grid .project-card.c-0,
+  .work-grid .project-card.c-1,
+  .work-grid .project-card.c-2,
+  .work-grid .project-card.c-3 {
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+
+  .filter-bar { gap: 0.3rem 1.1rem; margin-bottom: 2.4rem; }
+  .filter-btn { font-size: 0.66rem; letter-spacing: 0.14em; }
+
+  .section-head { flex-wrap: wrap; gap: 1rem; }
+
+  /* Case study stacks */
+  .case-meta { gap: 1.4rem 2.4rem; }
+  .case-gallery .frame.tall { max-width: 100%; }
+  .case-gallery-two { grid-template-columns: 1fr; }
+
+  /* Services rows stack */
+  .service-row { grid-template-columns: 2.6rem 1fr; }
+  .service-desc { grid-column: 2; margin-top: 0.3rem; }
+  .service-item { flex-direction: column; gap: 0.8rem; }
+
+  /* Contact rows stack */
+  .contact-row { grid-template-columns: 1fr auto; }
+  .contact-label { grid-column: 1 / -1; }
+  .contact-value { font-size: 1.05rem; }
+
+  .about-cols { grid-template-columns: 1fr; }
+
+  .footer-grid { grid-template-columns: 1fr; gap: 1.8rem; }
+  .footer-bottom { flex-direction: column; gap: 0.4rem; }
+
+  .statement-text { margin-bottom: 2rem; }
+}
+
+/* ---------- Small phones ---------- */
+@media (max-width: 560px) {
+  .featured-meta { flex-direction: column; gap: 0.5rem; }
+  .card-info { flex-direction: column; gap: 0.3rem; }
+  .card-meta { text-align: left; }
+  .page-hero { padding-top: 8rem; }
+  .case-hero { padding-top: 8rem; }
+}

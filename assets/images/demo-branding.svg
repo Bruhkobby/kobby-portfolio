@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1024">
+  <rect width="1536" height="1024" fill="#efece6"/>
+  <rect x="180" y="300" width="520" height="300" rx="6" fill="#181818" transform="rotate(-4 440 450)"/>
+  <rect x="330" y="420" width="520" height="300" rx="6" fill="#232323" transform="rotate(3 590 570)"/>
+  <rect x="420" y="180" width="420" height="240" rx="6" fill="#f7f5f0" stroke="#d8d3c8" transform="rotate(-2 630 300)"/>
+  <rect x="480" y="260" width="120" height="10" fill="#c96f3a" transform="rotate(-2 540 265)"/>
+  <rect x="480" y="290" width="220" height="6" fill="#c9c4b8" transform="rotate(-2 590 293)"/>
+  <rect x="480" y="308" width="180" height="6" fill="#c9c4b8" transform="rotate(-2 570 311)"/>
+  <circle cx="640" cy="640" r="60" fill="none" stroke="#efece6" stroke-width="3" transform="rotate(3 590 570)"/>
+  <path d="M620 640 h40 M640 620 v40" stroke="#efece6" stroke-width="3" transform="rotate(3 590 570)"/>
+  <rect x="1050" y="260" width="260" height="360" rx="6" fill="#181818"/>
+  <circle cx="1180" cy="420" r="70" fill="#c96f3a"/>
+  <rect x="1090" y="540" width="180" height="8" fill="#3a3a3a"/>
+</svg>
