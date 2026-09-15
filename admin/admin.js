@@ -87,6 +87,8 @@
       var user = res.data.session.user;
       var emailEl = $("userEmail");
       if (emailEl) emailEl.textContent = user.email || "";
+      var accEmail = $("accountEmail");
+      if (accEmail) accEmail.textContent = user.email || "";
       loadProjects();
     });
 
@@ -114,6 +116,22 @@
     // ---- Image uploads ----
     $("addImagesBtn").addEventListener("click", function () { $("imageInput").click(); });
     $("imageInput").addEventListener("change", uploadImages);
+
+    // ---- Tabs (Projects / Account) ----
+    document.querySelectorAll(".tab-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".tab-btn").forEach(function (b) {
+          b.classList.toggle("active", b === btn);
+        });
+        $("projectsTab").hidden = btn.getAttribute("data-tab") !== "projects";
+        $("accountTab").hidden = btn.getAttribute("data-tab") !== "account";
+      });
+    });
+
+    // ---- Account tab ----
+    $("passwordForm").addEventListener("submit", changePassword);
+    $("exportBtn").addEventListener("click", exportBackup);
+    $("signOutAllBtn").addEventListener("click", signOutAll);
   }
 
   /* ============================================================
@@ -143,6 +161,11 @@
   function renderProjectList() {
     var wrap = $("projectList");
     $("projectCount").textContent = state.projects.length;
+    var pub = state.projects.filter(function (p) { return p.published; }).length;
+    var statsEl = $("statsLine");
+    if (statsEl) {
+      statsEl.textContent = state.projects.length + " total · " + pub + " published · " + (state.projects.length - pub) + " drafts";
+    }
 
     if (!state.projects.length) {
       wrap.innerHTML = '<div class="card"><p class="muted">No projects yet. Click “+ New Project” to create your first one.</p></div>';
@@ -473,6 +496,85 @@
       var arr = state.editingImages;
       arr[index] = b; arr[other] = a;
       renderEditorImages();
+    });
+  }
+
+  /* ============================================================
+     ACCOUNT (password, backup, sessions)
+     ============================================================ */
+  function changePassword(e) {
+    e.preventDefault();
+    var errBox = $("pwError");
+    errBox.hidden = true;
+    $("pwStatus").textContent = "";
+
+    var current = $("pwCurrent").value;
+    var next = $("pwNew").value;
+    var confirm = $("pwConfirm").value;
+
+    if (next.length < 8) { showError(errBox, "New password must be at least 8 characters."); return; }
+    if (next !== confirm) { showError(errBox, "New passwords do not match."); return; }
+    if (next === current) { showError(errBox, "The new password is the same as the current one."); return; }
+
+    var btn = $("pwSaveBtn");
+    btn.disabled = true;
+    btn.textContent = "Updating…";
+
+    // Verify the current password by signing in, then update.
+    window.sb.auth.getSession()
+      .then(function (res) {
+        var email = res.data.session.user.email;
+        return window.sb.auth.signInWithPassword({ email: email, password: current });
+      })
+      .then(function (res) {
+        if (res.error) throw new Error("Current password is incorrect.");
+        return window.sb.auth.updateUser({ password: next });
+      })
+      .then(function (res) {
+        if (res.error) throw res.error;
+        btn.disabled = false;
+        btn.textContent = "Update Password";
+        $("passwordForm").reset();
+        $("pwStatus").textContent = "Password updated ✓";
+      })
+      .catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = "Update Password";
+        showError(errBox, err.message || "Could not update the password.");
+      });
+  }
+
+  function exportBackup() {
+    var status = $("exportStatus");
+    status.textContent = "Preparing backup…";
+    window.sb.from("projects")
+      .select("*, project_images(*)")
+      .order("sort_order", { ascending: true })
+      .then(function (res) {
+        if (res.error) throw res.error;
+        var data = {
+          exported_at: new Date().toISOString(),
+          project_count: (res.data || []).length,
+          projects: res.data || []
+        };
+        var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "portfolio-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        status.textContent = "Backup downloaded ✓";
+      })
+      .catch(function (err) {
+        status.textContent = "Backup failed: " + err.message;
+      });
+  }
+
+  function signOutAll() {
+    if (!confirm("Sign out from ALL devices? You will need to sign in again everywhere.")) return;
+    window.sb.auth.signOut({ scope: "global" }).then(function () {
+      location.href = "index.html";
     });
   }
 

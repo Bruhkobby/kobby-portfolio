@@ -306,6 +306,39 @@ code {
 .icon-btn.danger:hover { background: var(--a-err-bg); }
 .upload-status { font-size: 0.8rem; color: var(--a-muted); margin-top: 0.6rem; min-height: 1.2em; }
 
+/* ---------- Tabs ---------- */
+.admin-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.3rem;
+  border-bottom: 1px solid var(--a-line);
+}
+.tab-btn {
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--a-muted);
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: var(--a-ink); }
+.tab-btn.active { color: var(--a-accent); border-bottom-color: var(--a-accent); }
+
+/* ---------- Account tab ---------- */
+.account-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.2rem;
+  align-items: start;
+}
+.account-grid h3 { font-size: 1rem; margin-bottom: 0.8rem; }
+.account-email { font-weight: 600; margin-bottom: 1rem; word-break: break-all; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 800px) {
   .editor-grid { grid-template-columns: 1fr; }
@@ -315,4 +348,5 @@ code {
   .user-email { display: none; }
   .project-row { align-items: flex-start; }
   .project-actions { width: 100%; justify-content: flex-end; }
+  .tab-btn { padding: 0.55rem 0.7rem; }
 }
