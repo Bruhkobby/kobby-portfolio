@@ -45,7 +45,38 @@ create index if not exists project_images_project_id_idx
   on public.project_images (project_id);
 
 -- ------------------------------------------------------------
--- 3. ROW LEVEL SECURITY
+-- 3. MESSAGES TABLE (contact form submissions)
+--    Visitors can only SEND messages. Only logged-in users
+--    (your admin account) can read / update / delete them.
+-- ------------------------------------------------------------
+create table if not exists public.messages (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  email text not null,
+  message text not null,
+  read boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+alter table public.messages enable row level security;
+
+-- Visitors: insert only (send). They cannot read anyone's messages.
+drop policy if exists "Public can send messages" on public.messages;
+create policy "Public can send messages"
+  on public.messages for insert
+  to anon, authenticated
+  with check (true);
+
+-- Admin: full control for logged-in users
+drop policy if exists "Admin full access on messages" on public.messages;
+create policy "Admin full access on messages"
+  on public.messages for all
+  to authenticated
+  using (true)
+  with check (true);
+
+-- ------------------------------------------------------------
+-- 4. ROW LEVEL SECURITY
 --    - Anyone (anonymous visitors) may READ published projects.
 --    - Only logged-in users (your admin account) may add,
 --      edit, delete and read everything.

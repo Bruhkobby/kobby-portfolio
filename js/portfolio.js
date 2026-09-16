@@ -219,7 +219,11 @@
     }
 
     fetchProjects().then(function (projects) {
-      var p = projects.find(function (x) { return x.slug === slug; });
+      var idx = -1;
+      var p = null;
+      for (var k = 0; k < projects.length; k++) {
+        if (projects[k].slug === slug) { p = projects[k]; idx = k; break; }
+      }
       if (!p) {
         wrap.innerHTML =
           '<div class="case-hero">' +
@@ -276,8 +280,55 @@
         "</div>";
 
       wrap.innerHTML = html;
+
+      // Prev / next project navigation
+      var prev = idx > 0 ? projects[idx - 1] : null;
+      var next = idx < projects.length - 1 ? projects[idx + 1] : null;
+      if (prev || next) {
+        var pager = '<div class="case-pager" data-reveal>';
+        pager += prev
+          ? '<a class="case-pager-link" href="project.html?slug=' + encodeURIComponent(prev.slug) + '"><span class="case-pager-kicker">← Previous</span><span class="case-pager-title">' + escapeHTML(prev.title) + "</span></a>"
+          : "<span></span>";
+        pager += next
+          ? '<a class="case-pager-link next" href="project.html?slug=' + encodeURIComponent(next.slug) + '"><span class="case-pager-kicker">Next →</span><span class="case-pager-title">' + escapeHTML(next.title) + "</span></a>"
+          : "<span></span>";
+        pager += "</div>";
+        wrap.insertAdjacentHTML("beforeend", pager);
+      }
+
+      setupLightbox(wrap);
+
       document.dispatchEvent(new CustomEvent("content:updated"));
       window.scrollTo(0, 0);
+    });
+  }
+
+  /* ---------- Fullscreen image viewer (lightbox) ---------- */
+  function setupLightbox(scope) {
+    if (!scope || document.getElementById("lightboxEl")) return;
+    var lb = document.createElement("div");
+    lb.className = "lightbox";
+    lb.id = "lightboxEl";
+    lb.setAttribute("aria-hidden", "true");
+    lb.innerHTML = '<button class="lightbox-close" type="button" aria-label="Close">×</button><img alt="" />';
+    document.body.appendChild(lb);
+    var lbImg = lb.querySelector("img");
+
+    function close() {
+      lb.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+    lb.addEventListener("click", close);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") close();
+    });
+    scope.addEventListener("click", function (e) {
+      var img = e.target.closest(".case-hero-media img, .case-gallery img");
+      if (!img) return;
+      lbImg.src = img.getAttribute("src");
+      lbImg.alt = img.getAttribute("alt") || "";
+      lb.classList.add("open");
+      document.body.style.overflow = "hidden";
     });
   }
 

@@ -253,6 +253,31 @@ code {
   padding: 0.12rem 0.6rem;
   font-weight: 600;
 }
+.tab-btn .count-badge { font-size: 0.62rem; padding: 0.05rem 0.5rem; }
+
+/* ---------- Inbox (contact form messages) ---------- */
+.inbox-list { display: grid; gap: 0.9rem; }
+.message-card { display: grid; gap: 0.7rem; }
+.message-unread { border-left: 3px solid var(--accent); }
+.message-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.message-who { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.message-who strong { font-weight: 600; }
+.message-email { color: var(--accent); font-size: 0.85rem; }
+.message-email:hover { text-decoration: underline; }
+.dot-new {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+.message-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.message-body { color: var(--ink); line-height: 1.6; font-size: 0.92rem; }
 .list-hint { color: var(--muted); font-size: 0.85rem; margin-top: 0.35rem; }
 
 /* ---------- Project list rows ---------- */

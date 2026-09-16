@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+
+Sitemap: https://bruhkobby.github.io/kobby-portfolio/sitemap.xml

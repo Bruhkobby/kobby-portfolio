@@ -37,6 +37,7 @@
     <!-- ============ TABS ============ -->
     <nav class="admin-tabs" aria-label="Admin sections">
       <button class="tab-btn active" data-tab="projects" type="button">Projects</button>
+      <button class="tab-btn" data-tab="inbox" type="button">Inbox <span class="count-badge" id="inboxCount" hidden>0</span></button>
       <button class="tab-btn" data-tab="account" type="button">Account</button>
     </nav>
 
@@ -150,6 +151,17 @@
       </section>
     </section>
 
+    <!-- ============ INBOX TAB ============ -->
+    <section id="inboxTab" hidden>
+      <div class="list-head">
+        <h2>Inbox</h2>
+        <p class="list-hint">Messages sent through the contact form on your website.</p>
+      </div>
+      <div class="inbox-list" id="inboxList">
+        <p class="muted">Loading messages…</p>
+      </div>
+    </section>
+
     <!-- ============ ACCOUNT TAB ============ -->
     <section id="accountTab" hidden>
       <div class="account-grid">
@@ -209,6 +221,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
   <script src="../js/config.js" defer></script>
-  <script src="admin.js?v=2" defer></script>
+  <script src="admin.js?v=3" defer></script>
 </body>
 </html>

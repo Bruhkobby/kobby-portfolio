@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page not found — Kobby</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="/kobby-portfolio/assets/icons/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f2ee; --ink: #131311; --muted: #6f6b63;
+      --accent: #c96f3a;
+      --font-display: "Syne", sans-serif;
+      --font-body: "Inter", sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      font-weight: 300;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    .nf-code {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(5rem, 18vw, 11rem);
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+    .nf-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-top: 1rem;
+    }
+    .nf-sub { color: var(--muted); margin-top: 1rem; }
+    .nf-link {
+      display: inline-block;
+      margin-top: 2.4rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 0.4rem;
+      transition: color 0.3s, border-color 0.3s;
+    }
+    .nf-link:hover { color: var(--accent); border-color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="nf-code">404</div>
+    <h1 class="nf-title">Page not found</h1>
+    <p class="nf-sub">This page seems to have been unpublished — or never existed.</p>
+    <a class="nf-link" href="/kobby-portfolio/">Back to the work →</a>
+  </main>
+</body>
+</html>

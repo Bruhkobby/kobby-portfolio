@@ -117,14 +117,19 @@
     $("addImagesBtn").addEventListener("click", function () { $("imageInput").click(); });
     $("imageInput").addEventListener("change", uploadImages);
 
-    // ---- Tabs (Projects / Account) ----
+    // ---- Tabs (Projects / Inbox / Account) ----
+    var tabSections = ["projectsTab", "inboxTab", "accountTab"];
     document.querySelectorAll(".tab-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         document.querySelectorAll(".tab-btn").forEach(function (b) {
           b.classList.toggle("active", b === btn);
         });
-        $("projectsTab").hidden = btn.getAttribute("data-tab") !== "projects";
-        $("accountTab").hidden = btn.getAttribute("data-tab") !== "account";
+        var active = btn.getAttribute("data-tab");
+        tabSections.forEach(function (id) {
+          var section = $(id);
+          if (section) section.hidden = id !== active + "Tab";
+        });
+        if (active === "inbox") loadInbox();
       });
     });
 
@@ -132,6 +137,9 @@
     $("passwordForm").addEventListener("submit", changePassword);
     $("exportBtn").addEventListener("click", exportBackup);
     $("signOutAllBtn").addEventListener("click", signOutAll);
+
+    // ---- Inbox ----
+    loadInboxCount();
   }
 
   /* ============================================================
@@ -497,6 +505,114 @@
       arr[index] = b; arr[other] = a;
       renderEditorImages();
     });
+  }
+
+  /* ============================================================
+     INBOX (contact form messages)
+     ============================================================ */
+  function loadInboxCount() {
+    if (!(window.sb && window.SUPABASE_CONFIGURED)) return;
+    window.sb.from("messages")
+      .select("id, read")
+      .eq("read", false)
+      .then(function (res) {
+        if (res.error) return; // table may not exist yet — ignore quietly
+        var badge = $("inboxCount");
+        if (!badge) return;
+        var unread = (res.data || []).length;
+        badge.textContent = unread;
+        badge.hidden = unread === 0;
+      });
+  }
+
+  function loadInbox() {
+    var list = $("inboxList");
+    if (!list) return;
+    if (!(window.sb && window.SUPABASE_CONFIGURED)) {
+      list.innerHTML = '<p class="muted">Connect Supabase first (see the README) — then contact-form messages will appear here.</p>';
+      return;
+    }
+    window.sb.from("messages")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(function (res) {
+        if (res.error) throw res.error;
+        var msgs = res.data || [];
+        renderInbox(msgs);
+        loadInboxCount();
+      })
+      .catch(function (err) {
+        list.innerHTML = '<p class="muted">Could not load messages: ' + escapeHTML(err.message) + "</p>";
+      });
+  }
+
+  function renderInbox(msgs) {
+    var list = $("inboxList");
+    if (!msgs.length) {
+      list.innerHTML = '<div class="card"><p class="muted">No messages yet. When someone uses the contact form on your website, it will show up here.</p></div>';
+      return;
+    }
+    list.innerHTML = "";
+    msgs.forEach(function (m) {
+      var item = document.createElement("div");
+      item.className = "card message-card" + (m.read ? "" : " message-unread");
+      var date = m.created_at ? new Date(m.created_at) : null;
+      var dateStr = date ? date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) + " · " + date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "";
+      item.innerHTML =
+        '<div class="message-head">' +
+          '<div class="message-who">' +
+            (m.read ? "" : '<span class="dot-new" title="Unread"></span>') +
+            '<strong>' + escapeHTML(m.name || "Anonymous") + "</strong>" +
+            '<a class="message-email" href="mailto:' + encodeURIComponent(m.email || "") + '?subject=' + encodeURIComponent("Re: your message to Kobby") + '">' + escapeHTML(m.email || "") + "</a>" +
+          "</div>" +
+          '<div class="message-actions">' +
+            '<span class="muted small">' + escapeHTML(dateStr) + "</span>" +
+            (m.read ? "" : '<button class="btn btn-ghost btn-sm" data-act="read">Mark read</button>') +
+            '<button class="btn btn-danger btn-sm" data-act="del">Delete</button>' +
+          "</div>" +
+        "</div>" +
+        '<p class="message-body">' + escapeHTML(m.message || "").replace(/\n/g, "<br />") + "</p>";
+
+      item.addEventListener("click", function (e) {
+        var act = e.target.closest("[data-act]");
+        if (!act) return;
+        var action = act.getAttribute("data-act");
+        if (action === "read") markMessageRead(m, item);
+        else if (action === "del") deleteMessageRow(m, item);
+      });
+      list.appendChild(item);
+    });
+  }
+
+  function markMessageRead(m, item) {
+    window.sb.from("messages")
+      .update({ read: true })
+      .eq("id", m.id)
+      .then(function (res) {
+        if (res.error) throw res.error;
+        m.read = true;
+        item.classList.remove("message-unread");
+        var btn = item.querySelector('[data-act="read"]');
+        if (btn) btn.remove();
+        var dot = item.querySelector(".dot-new");
+        if (dot) dot.remove();
+        loadInboxCount();
+      })
+      .catch(function (err) { alert("Could not update: " + err.message); });
+  }
+
+  function deleteMessageRow(m, item) {
+    if (!confirm("Delete this message from " + (m.name || m.email || "anonymous") + "?")) return;
+    window.sb.from("messages")
+      .delete()
+      .eq("id", m.id)
+      .then(function (res) {
+        if (res.error) throw res.error;
+        item.remove();
+        loadInboxCount();
+        if (!$("inboxList").children.length) renderInbox([]);
+      })
+      .catch(function (err) { alert("Could not delete: " + err.message); });
   }
 
   /* ============================================================

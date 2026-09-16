@@ -67,6 +67,14 @@
   .case-gallery .frame.tall { max-width: 100%; }
   .case-gallery-two { grid-template-columns: 1fr; }
 
+  /* Case pager stacks */
+  .case-pager { flex-direction: column; gap: 1.8rem; }
+  .case-pager-link, .case-pager-link.next { max-width: 100%; text-align: left; justify-items: start; }
+
+  /* Contact form stacks */
+  .contact-form-section { grid-template-columns: 1fr; gap: 2.2rem; }
+  .form-row { grid-template-columns: 1fr; gap: 1.6rem; }
+
   /* Services rows stack */
   .service-row { grid-template-columns: 2.6rem 1fr; }
   .service-desc { grid-column: 2; margin-top: 0.3rem; }

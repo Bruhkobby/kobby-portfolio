@@ -9,10 +9,13 @@ A premium, minimal, editorial portfolio website built with **HTML5, CSS3 and van
 ├── project.html          ← Case-study page (?slug=project-name)
 ├── about.html            ← Bio, philosophy, skills, software, services
 ├── services.html         ← Services list
-├── contact.html          ← Contact details + socials
+├── contact.html          ← Contact details, socials + message form
+├── 404.html              ← Styled "page not found" page (GitHub Pages)
+├── robots.txt            ← Search-engine crawler rules
+├── sitemap.xml           ← Search-engine sitemap
 ├── admin/
 │   ├── index.html        ← Admin login (Supabase Auth)
-│   ├── dashboard.html    ← Admin dashboard (create/edit/delete/publish)
+│   ├── dashboard.html    ← Admin dashboard (projects / inbox / account)
 │   └── admin.js          ← All admin logic
 ├── css/
 │   ├── style.css         ← Public site styles
@@ -23,6 +26,7 @@ A premium, minimal, editorial portfolio website built with **HTML5, CSS3 and van
 │   ├── demo-data.js      ← Sample projects shown until Supabase is set up
 │   ├── main.js           ← Navigation, mobile menu, page transitions
 │   ├── portfolio.js      ← Loads projects from Supabase + renders pages
+│   ├── contact.js        ← Contact form (saves messages to Supabase)
 │   └── animations.js     ← Reveal animations + custom cursor
 ├── assets/
 │   ├── images/           ← Demo placeholder art (replace with real work via admin)
@@ -56,6 +60,7 @@ A premium, minimal, editorial portfolio website built with **HTML5, CSS3 and van
 4. You should see "Success". This creates:
    - `projects` table — all project info (title, category, brief, objective, etc.)
    - `project_images` table — image URLs linked to each project
+   - `messages` table — contact-form submissions (visitors can only send; only you can read them)
    - **Row Level Security** rules — visitors can only read *published* projects; only logged-in users can change anything
    - a public storage bucket called `project-images`
 
@@ -129,6 +134,8 @@ Open **`/admin/index.html`** (e.g. `https://yoursite.com/admin/index.html`) and 
 - **Delete** — removes the project and its uploaded images permanently.
 - **Reorder** — the ↑ ↓ buttons on each row change the display order on the public site.
 - **Featured** — tick "Featured project" to show it large on the homepage.
+- **Inbox** — messages sent through the contact form on your website, with an unread counter. Reply by email with one click, mark read, or delete.
+- **Account** — change your password, export a JSON backup of all projects, and sign out of every device at once.
 
 ## 9. Adding / editing / deleting portfolio projects
 
@@ -140,6 +147,15 @@ Same as section 8 — everything happens in the dashboard:
 4. Tick **Published** → the project appears on the public Work page immediately.
 
 To change text later: **Edit → change → Save Project**. To remove: **Delete**. No code, no redeploying.
+
+## 10. Contact form & inbox
+
+The Contact page has a built-in message form. Messages are stored in the `messages` table in Supabase and appear in the **Inbox** tab of the admin dashboard with an unread counter. Visitors can only *send* messages (Row Level Security blocks them from reading anything); only your signed-in admin account can read, mark read, or delete them.
+
+The form also includes:
+- client-side validation (name, email format, message length),
+- a hidden honeypot field that silently discards bots,
+- a graceful fallback to your email app if Supabase is not configured.
 
 ---
 

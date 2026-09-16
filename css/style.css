@@ -733,3 +733,149 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
   [data-reveal], [data-hero-reveal] { opacity: 1 !important; transform: none !important; }
   .cursor-dot { display: none; }
 }
+
+/* ============================================================
+   CONTACT FORM
+   ============================================================ */
+.contact-form-section {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(0, 1.6fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+}
+.contact-form-lead { color: var(--muted); max-width: 34ch; margin-top: 0.8rem; }
+.copy-email {
+  margin-top: 1.4rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+  transition: color 0.3s, border-color 0.3s;
+}
+.copy-email:hover { color: var(--accent); border-color: var(--accent); }
+
+.contact-form { display: grid; gap: 1.6rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; }
+.form-field { display: grid; gap: 0.55rem; }
+.form-field span {
+  font-size: 0.65rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.form-field input,
+.form-field textarea {
+  font: inherit;
+  font-weight: 300;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0;
+  border-radius: 0;
+  transition: border-color 0.3s var(--ease);
+}
+.form-field input:focus,
+.form-field textarea:focus { outline: none; border-color: var(--ink); }
+.form-field textarea { resize: vertical; min-height: 120px; }
+.form-field input::placeholder,
+.form-field textarea::placeholder { color: rgba(111, 107, 99, 0.55); }
+.hp-field { position: absolute; left: -9999px; top: -9999px; opacity: 0; height: 0; overflow: hidden; }
+
+.form-status { font-size: 0.85rem; color: var(--accent); min-height: 1.2em; margin: 0; }
+.form-status.error { color: #a33d2a; }
+
+.btn-line {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 0.9rem 0;
+  border-bottom: 2px solid var(--ink);
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.btn-line:hover { color: var(--accent); border-color: var(--accent); }
+.btn-line:hover .cta-arrow { transform: translateX(10px); }
+.btn-line:disabled { opacity: 0.45; cursor: wait; }
+
+.contact-form-done { padding: 1rem 0 3rem; }
+.contact-form-thanks {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   CASE STUDY — PREV / NEXT NAVIGATION
+   ============================================================ */
+.case-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: clamp(3rem, 7vw, 6rem) var(--gutter);
+  max-width: var(--max-w);
+  margin: 0 auto;
+  border-top: 1px solid var(--line);
+}
+.case-pager-link { display: grid; gap: 0.5rem; max-width: 46%; }
+.case-pager-link.next { text-align: right; justify-items: end; margin-left: auto; }
+.case-pager-kicker {
+  font-size: 0.62rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.case-pager-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.1rem, 2.4vw, 1.7rem);
+  text-transform: uppercase;
+  transition: color 0.3s var(--ease);
+}
+.case-pager-link:hover .case-pager-title { color: var(--accent); }
+
+/* ============================================================
+   LIGHTBOX
+   ============================================================ */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(14, 14, 12, 0.94);
+  opacity: 0;
+  transition: opacity 0.35s var(--ease);
+}
+.lightbox.open { opacity: 1; }
+.lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transform: scale(0.97);
+  transition: transform 0.35s var(--ease);
+}
+.lightbox.open img { transform: scale(1); }
+.lightbox-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.6rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--dark-ink);
+  opacity: 0.8;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.lightbox-close:hover { opacity: 1; transform: rotate(90deg); }
+.case-hero-media img,
+.case-gallery img { cursor: zoom-in; }
