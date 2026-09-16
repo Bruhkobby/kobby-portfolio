@@ -177,7 +177,7 @@
       var row = document.createElement("div");
       row.className = "project-row";
       row.innerHTML =
-        '<img class="project-thumb" src="' + (coverOf(p) || "data:image/gif;base64,R0lGODlhAQABAAAAACw=") + '" alt="" />' +
+        '<img class="project-thumb" src="' + escapeAttr(coverOf(p) || "data:image/gif;base64,R0lGODlhAQABAAAAACw=") + '" alt="" />' +
         '<div class="project-main">' +
           '<div class="project-name">' + escapeHTML(p.title) + "</div>" +
           '<div class="project-sub">' +
@@ -406,7 +406,7 @@
       var item = document.createElement("div");
       item.className = "image-item";
       item.innerHTML =
-        '<img src="' + img.image_url + '" alt="" />' +
+        '<img src="' + escapeAttr(img.image_url) + '" alt="" />' +
         '<span class="img-label">' + escapeHTML(fileNameOf(img.image_url)) + "</span>" +
         (i === 0 ? '<span class="cover-tag">Cover</span>' : "") +
         '<button class="icon-btn" data-act="up" title="Move up"' + (i === 0 ? " disabled" : "") + ">↑</button>" +
@@ -598,6 +598,8 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
+
+  function escapeAttr(str) { return escapeHTML(str); }
 
   /* ============================================================
      BOOT

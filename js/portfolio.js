@@ -82,7 +82,7 @@
     return (
       '<a class="project-card ' + (extraClass || "") + '" href="project.html?slug=' + encodeURIComponent(p.slug) + '">' +
         '<div class="card-media">' +
-          '<img src="' + p.cover + '" alt="' + escapeAttr(p.title) + '" loading="lazy" />' +
+          '<img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(p.title) + '" loading="lazy" />' +
         "</div>" +
         '<div class="card-info">' +
           '<h3 class="card-title">' + escapeHTML(p.title) + "</h3>" +
@@ -119,7 +119,7 @@
       if (featuredWrap) {
         featuredWrap.innerHTML = (
           '<a class="featured-media" href="project.html?slug=' + encodeURIComponent(featured.slug) + '" data-reveal>' +
-            '<img src="' + featured.cover + '" alt="' + escapeAttr(featured.title) + '" />' +
+            '<img src="' + escapeAttr(featured.cover) + '" alt="' + escapeAttr(featured.title) + '" />' +
           "</a>" +
           '<div class="featured-meta" data-reveal>' +
             '<h3 class="featured-title"><a href="project.html?slug=' + encodeURIComponent(featured.slug) + '">' + escapeHTML(featured.title) + "</a></h3>" +
@@ -246,7 +246,7 @@
             (p.year ? '<div class="case-meta-item"><span class="case-meta-label">Year</span><span class="case-meta-value">' + escapeHTML(p.year) + "</span></div>" : "") +
           "</div>" +
         "</div>" +
-        '<div class="case-hero-media" data-reveal><div class="frame"><img src="' + p.cover + '" alt="' + escapeAttr(p.title) + '" /></div></div>' +
+        '<div class="case-hero-media" data-reveal><div class="frame"><img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(p.title) + '" /></div></div>' +
         '<div class="case-body">' +
           sectionHTML("Client Brief", p.brief) +
           sectionHTML("Objective", p.objective) +
@@ -257,7 +257,7 @@
                 '<h2 class="case-section-label">Final Design</h2>' +
                 '<div class="case-gallery" style="padding:0;">' +
                   finalImages.map(function (src, i) {
-                    return '<div class="frame' + (i % 2 === 1 ? " wide" : "") + '"><img src="' + src + '" alt="' + escapeAttr(p.title) + ' — final design ' + (i + 1) + '" loading="lazy" /></div>';
+                    return '<div class="frame' + (i % 2 === 1 ? " wide" : "") + '"><img src="' + escapeAttr(src) + '" alt="' + escapeAttr(p.title) + ' — final design ' + (i + 1) + '" loading="lazy" /></div>';
                   }).join("") +
                 "</div>" +
               "</div>"
@@ -268,7 +268,7 @@
                 '<h2 class="case-section-label">Project Gallery</h2>' +
                 '<div class="case-gallery" style="padding:0;">' +
                   galleryImages.map(function (src, i) {
-                    return '<div class="frame"><img src="' + src + '" alt="' + escapeAttr(p.title) + ' — gallery image ' + (i + 1) + '" loading="lazy" /></div>';
+                    return '<div class="frame"><img src="' + escapeAttr(src) + '" alt="' + escapeAttr(p.title) + ' — gallery image ' + (i + 1) + '" loading="lazy" /></div>';
                   }).join("") +
                 "</div>" +
               "</div>"

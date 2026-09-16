@@ -67,11 +67,16 @@ create policy "Admin full access on projects"
   using (true)
   with check (true);
 
--- Public: read images (needed so published project images display)
+-- Public: read images, but ONLY images that belong to a published project
 drop policy if exists "Public read project images" on public.project_images;
 create policy "Public read project images"
   on public.project_images for select
-  using (true);
+  using (
+    exists (
+      select 1 from public.projects p
+      where p.id = project_id and p.published = true
+    )
+  );
 
 -- Admin: full control for logged-in users
 drop policy if exists "Admin full access on project images" on public.project_images;
