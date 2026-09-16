@@ -58,6 +58,7 @@
       creative_direction: p.creative_direction || "",
       process: p.process || "",
       result: p.result || "",
+      video_url: p.video_url || "",
       featured: Boolean(p.featured),
       images: images,
       cover: images[0] || ""
@@ -208,6 +209,20 @@
     );
   }
 
+  // Turn a video URL into an embed player (YouTube / Vimeo) or a native
+  // <video> element for direct files (mp4/webm) and storage uploads.
+  function videoEmbedHTML(url) {
+    var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
+    var vm = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+    if (yt) {
+      return '<div class="video-frame"><iframe src="https://www.youtube-nocookie.com/embed/' + encodeURIComponent(yt[1]) + '" title="Project video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>';
+    }
+    if (vm) {
+      return '<div class="video-frame"><iframe src="https://player.vimeo.com/video/' + encodeURIComponent(vm[1]) + '" title="Project video" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>';
+    }
+    return '<div class="video-frame"><video src="' + escapeAttr(url) + '" controls playsinline preload="metadata"></video></div>';
+  }
+
   function initCaseStudy() {
     var wrap = document.getElementById("project-page");
     if (!wrap) return;
@@ -252,6 +267,7 @@
         "</div>" +
         '<div class="case-hero-media" data-reveal><div class="frame"><img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(p.title) + '" /></div></div>' +
         '<div class="case-body">' +
+          (p.video_url ? '<div class="case-section" data-reveal>' + '<h2 class="case-section-label">Motion</h2>' + videoEmbedHTML(p.video_url) + "</div>" : "") +
           sectionHTML("Client Brief", p.brief) +
           sectionHTML("Objective", p.objective) +
           sectionHTML("Creative Direction", p.creative_direction) +

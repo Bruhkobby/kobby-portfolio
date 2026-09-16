@@ -116,6 +116,9 @@
     // ---- Image uploads ----
     $("addImagesBtn").addEventListener("click", function () { $("imageInput").click(); });
     $("imageInput").addEventListener("change", uploadImages);
+    // ---- Video upload ----
+    $("addVideoBtn").addEventListener("click", function () { $("videoInput").click(); });
+    $("videoInput").addEventListener("change", uploadVideo);
 
     // ---- Tabs (Projects / Inbox / Account) ----
     var tabSections = ["projectsTab", "inboxTab", "accountTab"];
@@ -297,14 +300,17 @@
       $("fCreative").value = p.creative_direction || "";
       $("fProcess").value = p.process || "";
       $("fResult").value = p.result || "";
+      $("fVideo").value = p.video_url || "";
       $("fFeatured").checked = Boolean(p.featured);
       $("fPublished").checked = Boolean(p.published);
       loadEditorImages(projectId);
     } else {
       $("editorTitle").textContent = "New Project";
       $("fYear").value = String(new Date().getFullYear());
+      $("fVideo").value = "";
       $("imagesHint").textContent = "Save the project first, then upload images.";
       $("addImagesBtn").disabled = true;
+      $("addVideoBtn").disabled = true;
       $("imagesList").innerHTML = '<p class="muted small">Save the project first to upload images.</p>';
     }
 
@@ -333,6 +339,7 @@
       creative_direction: $("fCreative").value.trim(),
       process: $("fProcess").value.trim(),
       result: $("fResult").value.trim(),
+      video_url: $("fVideo").value.trim(),
       featured: $("fFeatured").checked,
       published: $("fPublished").checked,
       updated_at: new Date().toISOString()
@@ -349,6 +356,7 @@
       state.editingId = id;
       $("editorTitle").textContent = "Edit Project";
       $("addImagesBtn").disabled = false;
+      $("addVideoBtn").disabled = false;
       $("imagesHint").textContent = "Upload the cover first — the first image is used as the project cover.";
       if (isNew) {
         // Refresh stored project list so "Back to list" shows the new item.
@@ -389,6 +397,7 @@
   function loadEditorImages(projectId) {
     $("imagesList").innerHTML = '<p class="muted small">Loading images…</p>';
     $("addImagesBtn").disabled = false;
+    $("addVideoBtn").disabled = false;
     window.sb.from("project_images")
       .select("*")
       .eq("project_id", projectId)
@@ -468,6 +477,27 @@
           status.textContent = "Upload failed: " + err.message;
         });
     });
+  }
+
+  function uploadVideo(e) {
+    var file = (e.target.files || [])[0];
+    if (!file || !state.editingId) return;
+    var status = $("uploadStatus");
+    var ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+    var path = state.editingId + "/" + Date.now() + "-video." + ext;
+    status.textContent = "Uploading video…";
+
+    window.sb.storage.from(window.SUPABASE_BUCKET).upload(path, file, { cacheControl: "3600", upsert: false })
+      .then(function (res) {
+        if (res.error) throw res.error;
+        var pub = window.sb.storage.from(window.SUPABASE_BUCKET).getPublicUrl(path);
+        $("fVideo").value = pub.data.publicUrl;
+        status.textContent = "Video uploaded ✓ — remember to click Save Project.";
+        $("videoInput").value = "";
+      })
+      .catch(function (err) {
+        status.textContent = "Video upload failed: " + err.message;
+      });
   }
 
   function deleteImage(img, index) {

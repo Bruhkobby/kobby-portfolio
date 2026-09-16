@@ -119,6 +119,10 @@
               <span>Result / Outcome</span>
               <textarea id="fResult" rows="3" placeholder="What was the final result?"></textarea>
             </label>
+            <label class="field">
+              <span>Video URL — YouTube, Vimeo or direct video file (optional, for Motion work)</span>
+              <input type="text" id="fVideo" placeholder="https://www.youtube.com/watch?v=… or https://…/video.mp4" />
+            </label>
             <div class="field-checks">
               <label class="check">
                 <input type="checkbox" id="fFeatured" />
@@ -142,6 +146,8 @@
             <p class="muted small" id="imagesHint">Upload the cover first — the first image is used as the project cover.</p>
             <input type="file" id="imageInput" accept="image/*" multiple hidden />
             <button class="btn btn-secondary btn-block" id="addImagesBtn" type="button" disabled>Upload images</button>
+            <input type="file" id="videoInput" accept="video/*" hidden />
+            <button class="btn btn-secondary btn-block" id="addVideoBtn" type="button" disabled style="margin-top:0.6rem;">Upload video file</button>
             <div class="images-list" id="imagesList">
               <p class="muted small">Save the project first to upload images.</p>
             </div>
@@ -221,6 +227,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
   <script src="../js/config.js" defer></script>
-  <script src="admin.js?v=3" defer></script>
+  <script src="admin.js?v=4" defer></script>
 </body>
 </html>

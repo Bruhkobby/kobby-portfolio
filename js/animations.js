@@ -9,12 +9,16 @@
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---------- Hero entrance (staggered) ---------- */
-  document.addEventListener("page:ready", function () {
+  var runHeroReveal = function () {
     var heroItems = document.querySelectorAll("[data-hero-reveal]");
     heroItems.forEach(function (el, i) {
       setTimeout(function () { el.classList.add("in"); }, 120 + i * 110);
     });
-  });
+  };
+  document.addEventListener("page:ready", runHeroReveal);
+  // Safety: if page:ready fired before this script registered (possible on
+  // slower connections), run the hero reveal immediately.
+  if (document.body.classList.contains("page-ready")) runHeroReveal();
 
   /* ---------- Scroll reveal ---------- */
   if ("IntersectionObserver" in window && !reduceMotion) {
