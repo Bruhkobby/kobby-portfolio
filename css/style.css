@@ -41,8 +41,13 @@ button { font: inherit; background: none; border: 0; cursor: pointer; color: inh
 ::selection { background: var(--ink); color: var(--bg); }
 
 /* ---------- Page transitions ---------- */
-.page { opacity: 0; transition: opacity 0.45s var(--ease); }
-.page.page-ready { opacity: 1; }
+/* CSS-driven fade-in: the page is always visible, even if JavaScript
+   fails to load. JS only adds .page-leaving before navigating. */
+.page { animation: pageIn 0.45s var(--ease) both; }
+@keyframes pageIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
 
 /* ---------- Header / Nav ---------- */
@@ -120,10 +125,17 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
   justify-content: center;
   padding: 6rem var(--gutter) 3rem;
   clip-path: inset(0 0 100% 0);
-  transition: clip-path 0.65s var(--ease);
+  transition: clip-path 0.65s var(--ease), visibility 0s 0.65s;
   visibility: hidden;
+  /* Never intercept clicks while hidden. */
+  pointer-events: none;
 }
-.mobile-menu.open { clip-path: inset(0 0 0 0); visibility: visible; }
+.mobile-menu.open {
+  clip-path: inset(0 0 0 0);
+  visibility: visible;
+  transition: clip-path 0.65s var(--ease), visibility 0s 0s;
+  pointer-events: auto;
+}
 .mobile-menu nav { display: flex; flex-direction: column; gap: 0.4rem; }
 .mobile-menu nav a {
   font-family: var(--font-display);
@@ -268,15 +280,22 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
   writing-mode: vertical-rl;
 }
 
-/* Hero entrance (JS adds .in to trigger) */
+/* Hero entrance — pure CSS stagger, works without JavaScript */
 [data-hero-reveal] {
   opacity: 0;
-  transform: translateY(36px);
+  animation: heroIn 0.9s var(--ease) forwards;
 }
-.page-ready [data-hero-reveal] {
-  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+[data-hero-reveal]:nth-child(1) { animation-delay: 0.12s; }
+[data-hero-reveal]:nth-child(2) { animation-delay: 0.23s; }
+[data-hero-reveal]:nth-child(3) { animation-delay: 0.34s; }
+[data-hero-reveal]:nth-child(4) { animation-delay: 0.45s; }
+[data-hero-reveal]:nth-child(5) { animation-delay: 0.56s; }
+[data-hero-reveal]:nth-child(6) { animation-delay: 0.67s; }
+[data-hero-reveal]:nth-child(n + 7) { animation-delay: 0.78s; }
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(36px); }
+  to { opacity: 1; transform: none; }
 }
-.page-ready [data-hero-reveal].in { opacity: 1; transform: none; }
 
 /* ---------- Featured project ---------- */
 .featured-wrap { display: grid; gap: 1.6rem; }
@@ -697,8 +716,11 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
 }
 
 /* ---------- Scroll reveal ---------- */
-[data-reveal] { opacity: 0; transform: translateY(30px); }
-[data-reveal].in {
+/* Content is visible by default. JavaScript "arms" below-fold elements
+   with .reveal-armed just before they animate in, so nothing is ever
+   lost if the script fails. */
+[data-reveal].reveal-armed { opacity: 0; transform: translateY(30px); }
+[data-reveal].reveal-armed.in {
   opacity: 1;
   transform: none;
   transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
@@ -855,9 +877,17 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
   padding: clamp(1rem, 4vw, 3rem);
   background: rgba(14, 14, 12, 0.94);
   opacity: 0;
-  transition: opacity 0.35s var(--ease);
+  /* Invisible lightbox must NEVER block clicks on the page beneath. */
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s var(--ease), visibility 0s 0.35s;
 }
-.lightbox.open { opacity: 1; }
+.lightbox.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.35s var(--ease), visibility 0s 0s;
+}
 .lightbox img {
   max-width: 100%;
   max-height: 100%;

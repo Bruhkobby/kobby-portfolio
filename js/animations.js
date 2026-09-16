@@ -8,17 +8,8 @@
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- Hero entrance (staggered) ---------- */
-  var runHeroReveal = function () {
-    var heroItems = document.querySelectorAll("[data-hero-reveal]");
-    heroItems.forEach(function (el, i) {
-      setTimeout(function () { el.classList.add("in"); }, 120 + i * 110);
-    });
-  };
-  document.addEventListener("page:ready", runHeroReveal);
-  // Safety: if page:ready fired before this script registered (possible on
-  // slower connections), run the hero reveal immediately.
-  if (document.body.classList.contains("page-ready")) runHeroReveal();
+  /* Hero entrance is pure CSS (see style.css) — no JS needed, so the
+     hero is always visible even if this script fails to load. */
 
   /* ---------- Scroll reveal ---------- */
   if ("IntersectionObserver" in window && !reduceMotion) {
@@ -38,14 +29,24 @@
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
 
-    var observeAll = function () {
-      document.querySelectorAll("[data-reveal]:not(.in)").forEach(function (el) { io.observe(el); });
+    var armAndObserve = function () {
+      document.querySelectorAll("[data-reveal]:not(.in)").forEach(function (el) {
+        if (el.classList.contains("reveal-armed")) return;
+        var rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          // Already on screen: show it immediately, no hidden flash.
+          el.classList.add("in");
+        } else {
+          el.classList.add("reveal-armed");
+          io.observe(el);
+        }
+      });
     };
-    observeAll();
-    // Observe elements injected later (e.g. portfolio grid).
-    document.addEventListener("content:updated", observeAll);
+    armAndObserve();
+    // Re-arm elements injected later (e.g. portfolio grid).
+    document.addEventListener("content:updated", armAndObserve);
   } else {
-    // No observer / reduced motion → show everything.
+    // No observer / reduced motion → show everything immediately.
     document.querySelectorAll("[data-reveal]").forEach(function (el) { el.classList.add("in"); });
     document.addEventListener("content:updated", function () {
       document.querySelectorAll("[data-reveal]:not(.in)").forEach(function (el) { el.classList.add("in"); });

@@ -97,6 +97,9 @@
 
     e.preventDefault();
     document.body.classList.add("page-leaving");
+    // Safety: if navigation is ever blocked (extension, network), undo the
+    // fade so the visitor is never left on an invisible page.
+    setTimeout(function () { document.body.classList.remove("page-leaving"); }, 1400);
     setTimeout(function () { location.href = href; }, 320);
   });
 })();
