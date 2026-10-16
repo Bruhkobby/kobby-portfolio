@@ -23,7 +23,7 @@
 
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: var(--bg); } /* gives the header's blend-mode something to invert against, so nav text turns dark on light pages */
 body {
   font-family: var(--font-body);
   font-weight: 300;
