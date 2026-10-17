@@ -229,6 +229,47 @@
     return '<div class="video-frame"><video src="' + escapeAttr(url) + '" controls playsinline preload="metadata"></video></div>';
   }
 
+  // Give each project page its own search-engine details (title is set separately).
+  function setHead(selector, attr, value) {
+    var node = document.head.querySelector(selector);
+    if (node && value) node.setAttribute(attr, value);
+  }
+
+  function updateProjectSEO(p) {
+    var url = location.origin + location.pathname + "?slug=" + encodeURIComponent(p.slug);
+    var desc = String(p.brief || p.objective || "").replace(/\s+/g, " ").trim();
+    if (desc.length > 155) desc = desc.slice(0, 152).replace(/\s+\S*$/, "") + "…";
+    if (!desc) desc = p.title + " — " + p.category + " project by Kobby, graphic designer and video editor.";
+    var title = p.title + " — Kobby";
+
+    setHead('link[rel="canonical"]', "href", url);
+    setHead('meta[name="description"]', "content", desc);
+    setHead('meta[property="og:title"]', "content", title);
+    setHead('meta[property="og:description"]', "content", desc);
+    setHead('meta[property="og:url"]', "content", url);
+    setHead('meta[name="twitter:title"]', "content", title);
+    setHead('meta[name="twitter:description"]', "content", desc);
+    if (/^https?:/.test(p.cover)) {
+      setHead('meta[property="og:image"]', "content", p.cover);
+      setHead('meta[name="twitter:image"]', "content", p.cover);
+    }
+
+    var ld = document.createElement("script");
+    ld.type = "application/ld+json";
+    ld.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      name: p.title,
+      description: desc,
+      url: url,
+      genre: p.category,
+      image: p.images,
+      creator: { "@type": "Person", name: "Elorm Kwabena Delight Brown", alternateName: "Kobby" },
+      ...(p.year ? { dateCreated: p.year } : {})
+    });
+    document.head.appendChild(ld);
+  }
+
   function initCaseStudy() {
     var wrap = document.getElementById("project-page");
     if (!wrap) return;
@@ -256,6 +297,7 @@
       }
 
       document.title = p.title + " — Kobby";
+      updateProjectSEO(p);
 
       // Final design: first images, large. Gallery: remaining images.
       var finalImages = p.images.slice(0, 2);
