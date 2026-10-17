@@ -20,6 +20,20 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const SUPABASE_BUCKET = "project-images";
 
 /* ------------------------------------------------------------
+   PORTFOLIO DIVISIONS
+   One list shared by the public Portfolio page and the admin
+   dashboard. Each project has a Category; each Category belongs
+   to one division. To add a category, add it to a division here.
+   ------------------------------------------------------------ */
+window.DIVISIONS = [
+  { id: "video",    name: "Video & Motion",   blurb: "Video edits, motion graphics and animated pieces.",   categories: ["Video Editing", "Motion"] },
+  { id: "branding", name: "Branding",         blurb: "Logos, brand identities and guidelines.",             categories: ["Branding"] },
+  { id: "print",    name: "Flyers & Posters", blurb: "Print and digital flyers, posters and banners.",      categories: ["Flyers", "Posters"] },
+  { id: "social",   name: "Social Media",     blurb: "Campaign visuals and content for social platforms.",  categories: ["Social Media"] },
+  { id: "graphic",  name: "Graphic Design",   blurb: "Layouts, UI/UX, photo editing and other design work.", categories: ["Graphic Design", "UI/UX", "Photo Editing", "Other"] }
+];
+
+/* ------------------------------------------------------------
    Do not edit below this line.
    Creates the shared Supabase client used by the public site
    and the admin dashboard (window.sb).

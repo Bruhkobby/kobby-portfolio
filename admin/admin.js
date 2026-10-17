@@ -66,12 +66,57 @@
   var state = {
     projects: [],
     editingId: null,   // null = new project
-    editingImages: []  // images of the project being edited
+    editingImages: [], // images of the project being edited
+    divisionFilter: "all"
   };
+
+  /* ---------- Divisions (shared list in js/config.js) ---------- */
+  var DIVISIONS = (window.DIVISIONS && window.DIVISIONS.length) ? window.DIVISIONS : [
+    { id: "all-work", name: "All projects", categories: [] }
+  ];
+
+  function divisionOf(category) {
+    var c = String(category || "Other").toLowerCase();
+    for (var i = 0; i < DIVISIONS.length; i++) {
+      if (DIVISIONS[i].categories.some(function (x) { return x.toLowerCase() === c; })) return DIVISIONS[i];
+    }
+    return DIVISIONS[DIVISIONS.length - 1];
+  }
+
+  // Fill the Category dropdown, grouped by division.
+  function fillCategorySelect() {
+    var sel = document.getElementById("fCategory");
+    if (!sel || !(window.DIVISIONS && window.DIVISIONS.length)) return;
+    sel.innerHTML = DIVISIONS.map(function (d) {
+      return '<optgroup label="' + escapeAttr(d.name) + '">' +
+        d.categories.map(function (c) { return "<option>" + escapeHTML(c) + "</option>"; }).join("") +
+        "</optgroup>";
+    }).join("");
+  }
+
+  // Make sure an older/unknown category still shows up when editing.
+  function setCategoryValue(value) {
+    var sel = $("fCategory");
+    var found = Array.prototype.some.call(sel.options, function (o) { return o.value === value; });
+    if (value && !found) {
+      var opt = document.createElement("option");
+      opt.textContent = value;
+      sel.insertBefore(opt, sel.firstChild);
+    }
+    sel.value = value || "Other";
+  }
 
   function $(id) { return document.getElementById(id); }
 
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest(".division-tab");
+    if (!t) return;
+    state.divisionFilter = t.getAttribute("data-division");
+    renderProjectList();
+  });
+
   function initDashboard() {
+    fillCategorySelect();
     if (!requireSupabase()) {
       $("projectList").innerHTML = '<div class="card"><p class="muted">Connect Supabase first (see the yellow note above) — then your projects will appear here.</p></div>';
       $("projectCount").textContent = "0";
@@ -169,6 +214,21 @@
     return imgs.length ? imgs[0].image_url : "";
   }
 
+  function renderDivisionTabs() {
+    var tabs = $("divisionTabs");
+    if (!tabs) return;
+    var counts = {};
+    state.projects.forEach(function (p) { var id = divisionOf(p.category).id; counts[id] = (counts[id] || 0) + 1; });
+    var items = [{ id: "all", name: "All", count: state.projects.length }].concat(
+      DIVISIONS.filter(function (d) { return counts[d.id]; }).map(function (d) { return { id: d.id, name: d.name, count: counts[d.id] }; })
+    );
+    if (!items.some(function (t) { return t.id === state.divisionFilter; })) state.divisionFilter = "all";
+    tabs.innerHTML = items.map(function (t) {
+      return '<button type="button" class="division-tab' + (t.id === state.divisionFilter ? " active" : "") + '" data-division="' + escapeAttr(t.id) + '">' +
+        escapeHTML(t.name) + ' <span class="division-tab-count">' + t.count + "</span></button>";
+    }).join("");
+  }
+
   function renderProjectList() {
     var wrap = $("projectList");
     $("projectCount").textContent = state.projects.length;
@@ -177,6 +237,7 @@
     if (statsEl) {
       statsEl.textContent = state.projects.length + " total · " + pub + " published · " + (state.projects.length - pub) + " drafts";
     }
+    renderDivisionTabs();
 
     if (!state.projects.length) {
       wrap.innerHTML = '<div class="card"><p class="muted">No projects yet. Click “+ New Project” to create your first one.</p></div>';
@@ -184,38 +245,49 @@
     }
 
     wrap.innerHTML = "";
-    state.projects.forEach(function (p, index) {
-      var row = document.createElement("div");
-      row.className = "project-row";
-      row.innerHTML =
-        '<img class="project-thumb" src="' + escapeAttr(coverOf(p) || "data:image/gif;base64,R0lGODlhAQABAAAAACw=") + '" alt="" />' +
-        '<div class="project-main">' +
-          '<div class="project-name">' + escapeHTML(p.title) + "</div>" +
-          '<div class="project-sub">' +
-            '<span class="badge ' + (p.published ? "badge-published" : "badge-draft") + '">' + (p.published ? "Published" : "Draft") + "</span>" +
-            (p.featured ? '<span class="badge badge-featured">Featured</span>' : "") +
-            escapeHTML(p.category) + (p.year ? " · " + escapeHTML(p.year) : "") +
-          "</div>" +
-        "</div>" +
-        '<div class="project-actions">' +
-          '<button class="btn btn-ghost btn-sm" data-act="up" title="Move up"' + (index === 0 ? " disabled" : "") + ">↑</button>" +
-          '<button class="btn btn-ghost btn-sm" data-act="down" title="Move down"' + (index === state.projects.length - 1 ? " disabled" : "") + ">↓</button>" +
-          '<label class="toggle' + (p.published ? " on" : "") + '" title="Publish / unpublish"><input type="checkbox" data-act="publish" style="display:none"' + (p.published ? " checked" : "") + " /></label>" +
-          '<button class="btn btn-ghost btn-sm" data-act="edit">Edit</button>' +
-          '<button class="btn btn-danger btn-sm" data-act="delete">Delete</button>' +
-        "</div>";
+    DIVISIONS.forEach(function (d) {
+      if (state.divisionFilter !== "all" && state.divisionFilter !== d.id) return;
+      var group = state.projects.filter(function (p) { return divisionOf(p.category) === d; });
+      if (!group.length) return;
 
-      row.addEventListener("click", function (e) {
-        var act = e.target.closest("[data-act]");
-        if (!act) return;
-        var action = act.getAttribute("data-act");
-        if (action === "edit") openEditor(p.id);
-        else if (action === "publish") togglePublished(p);
-        else if (action === "delete") deleteProject(p);
-        else if (action === "up") moveProject(index, -1);
-        else if (action === "down") moveProject(index, 1);
+      var head = document.createElement("div");
+      head.className = "division-head";
+      head.innerHTML = "<span>" + escapeHTML(d.name) + '</span><span class="count-badge">' + group.length + "</span>";
+      wrap.appendChild(head);
+
+      group.forEach(function (p, gi) {
+        var row = document.createElement("div");
+        row.className = "project-row";
+        row.innerHTML =
+          '<img class="project-thumb" src="' + escapeAttr(coverOf(p) || "data:image/gif;base64,R0lGODlhAQABAAAAACw=") + '" alt="" />' +
+          '<div class="project-main">' +
+            '<div class="project-name">' + escapeHTML(p.title) + "</div>" +
+            '<div class="project-sub">' +
+              '<span class="badge ' + (p.published ? "badge-published" : "badge-draft") + '">' + (p.published ? "Published" : "Draft") + "</span>" +
+              (p.featured ? '<span class="badge badge-featured">Featured</span>' : "") +
+              escapeHTML(p.category) + (p.year ? " · " + escapeHTML(p.year) : "") +
+            "</div>" +
+          "</div>" +
+          '<div class="project-actions">' +
+            '<button class="btn btn-ghost btn-sm" data-act="up" title="Move up"' + (gi === 0 ? " disabled" : "") + ">↑</button>" +
+            '<button class="btn btn-ghost btn-sm" data-act="down" title="Move down"' + (gi === group.length - 1 ? " disabled" : "") + ">↓</button>" +
+            '<label class="toggle' + (p.published ? " on" : "") + '" title="Publish / unpublish"><input type="checkbox" data-act="publish" style="display:none"' + (p.published ? " checked" : "") + " /></label>" +
+            '<button class="btn btn-ghost btn-sm" data-act="edit">Edit</button>' +
+            '<button class="btn btn-danger btn-sm" data-act="delete">Delete</button>' +
+          "</div>";
+
+        row.addEventListener("click", function (e) {
+          var act = e.target.closest("[data-act]");
+          if (!act) return;
+          var action = act.getAttribute("data-act");
+          if (action === "edit") openEditor(p.id);
+          else if (action === "publish") togglePublished(p);
+          else if (action === "delete") deleteProject(p);
+          else if (action === "up") moveProject(group, gi, -1);
+          else if (action === "down") moveProject(group, gi, 1);
+        });
+        wrap.appendChild(row);
       });
-      wrap.appendChild(row);
     });
   }
 
@@ -231,16 +303,23 @@
       .catch(function (err) { alert("Could not update: " + err.message); });
   }
 
-  function moveProject(index, dir) {
-    var other = index + dir;
-    if (other < 0 || other >= state.projects.length) return;
-    var a = state.projects[index], b = state.projects[other];
-    var sa = a.sort_order || index, sbv = b.sort_order || other;
-    Promise.all([
-      window.sb.from("projects").update({ sort_order: sbv }).eq("id", a.id),
-      window.sb.from("projects").update({ sort_order: sa }).eq("id", b.id)
-    ]).then(function (results) {
-      if (results[0].error || results[1].error) { alert("Could not reorder."); }
+  // Swap a project with its neighbour inside the same division, then
+  // renumber the whole list 1..n so the public order always matches.
+  function moveProject(group, gi, dir) {
+    var other = gi + dir;
+    if (other < 0 || other >= group.length) return;
+    var a = group[gi], b = group[other];
+    var order = state.projects.slice();
+    var ia = order.indexOf(a), ib = order.indexOf(b);
+    order[ia] = b;
+    order[ib] = a;
+    var jobs = [];
+    order.forEach(function (p, i) {
+      var want = i + 1;
+      if (p.sort_order !== want) jobs.push(window.sb.from("projects").update({ sort_order: want }).eq("id", p.id));
+    });
+    Promise.all(jobs).then(function (results) {
+      if (results.some(function (r) { return r.error; })) { alert("Could not reorder."); }
       loadProjects();
     });
   }
@@ -292,7 +371,7 @@
       $("fTitle").value = p.title || "";
       $("fSlug").value = p.slug || "";
       $("fSlug").dataset.dirty = "1";
-      $("fCategory").value = p.category || "Other";
+      setCategoryValue(p.category);
       $("fClient").value = p.client || "";
       $("fYear").value = p.year || "";
       $("fBrief").value = p.brief || "";

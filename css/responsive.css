@@ -17,6 +17,7 @@
   .work-grid .project-card.c-3 { grid-column: 7 / span 6; }
 
   .case-section { grid-template-columns: 1fr; gap: 1rem; }
+  .related-grid { grid-template-columns: 1fr 1fr; }
   .post-layout { grid-template-columns: 1fr; gap: 1.6rem; }
   .post-aside { position: static; grid-auto-flow: column; justify-content: start; gap: 2.4rem; }
   .case-gallery .frame.tall { max-width: 80%; }
@@ -90,6 +91,9 @@
   .contact-value { font-size: 1.05rem; }
 
   .about-cols { grid-template-columns: 1fr; }
+
+  .related-grid { grid-template-columns: 1fr; }
+  .division-count { display: none; }
 
   /* Blog list stacks */
   .post-row { grid-template-columns: 1fr; gap: 0.6rem; }

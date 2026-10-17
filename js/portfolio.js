@@ -7,7 +7,24 @@
 (function () {
   "use strict";
 
-  var CATEGORIES = ["All", "Branding", "Social Media", "Flyers", "Posters", "UI/UX", "Photo Editing", "Motion", "Other"];
+  // Divisions come from js/config.js (shared with the admin dashboard).
+  var DIVISIONS = (window.DIVISIONS && window.DIVISIONS.length) ? window.DIVISIONS : [
+    { id: "all-work", name: "All work", blurb: "", categories: [] }
+  ];
+
+  function divisionOf(category) {
+    var c = String(category || "Other").toLowerCase();
+    for (var i = 0; i < DIVISIONS.length; i++) {
+      if (DIVISIONS[i].categories.some(function (x) { return x.toLowerCase() === c; })) return DIVISIONS[i];
+    }
+    return DIVISIONS[DIVISIONS.length - 1]; // anything unrecognised goes in the last division
+  }
+
+  function groupByDivision(projects) {
+    return DIVISIONS.map(function (d) {
+      return { division: d, projects: projects.filter(function (p) { return divisionOf(p.category) === d; }) };
+    }).filter(function (g) { return g.projects.length; });
+  }
 
   /* ============================================================
      DATA LAYER
@@ -83,6 +100,7 @@
       '<a class="project-card ' + (extraClass || "") + '" href="project.html?slug=' + encodeURIComponent(p.slug) + '">' +
         '<div class="card-media">' +
           '<img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(p.title) + '" loading="lazy" />' +
+          (p.video_url ? '<span class="card-badge">▶ Video</span>' : "") +
         "</div>" +
         '<div class="card-info">' +
           '<h3 class="card-title">' + escapeHTML(p.title) + "</h3>" +
@@ -133,6 +151,13 @@
         selectedWrap.innerHTML = rest.map(function (p, i) { return cardHTML(p, "preview-" + i); }).join("");
       }
 
+      var chips = document.getElementById("division-links");
+      if (chips) {
+        chips.innerHTML = groupByDivision(projects).map(function (g) {
+          return '<a class="filter-btn" href="portfolio.html#' + g.division.id + '">' + escapeHTML(g.division.name) + "</a>";
+        }).join("");
+      }
+
       document.dispatchEvent(new CustomEvent("content:updated"));
     }).catch(function () {
       if (featuredWrap) featuredWrap.innerHTML = '<p class="loading-note">' + LOAD_ERROR_TEXT + "</p>";
@@ -145,56 +170,84 @@
      ============================================================ */
 
   function initPortfolio() {
-    var grid = document.getElementById("work-grid");
+    var holder = document.getElementById("work-divisions");
     var filterBar = document.getElementById("filterBar");
-    if (!grid) return;
+    if (!holder) return;
 
-    var allProjects = [];
-    var activeFilter = "All";
+    var groups = [];
+    var active = "all"; // "all" or a division id
 
-    function renderFilters() {
-      filterBar.innerHTML = CATEGORIES.map(function (cat) {
-        var hasProjects = cat === "All" || allProjects.some(function (p) {
-          return (p.category || "Other").toLowerCase() === cat.toLowerCase();
-        });
-        if (cat !== "All" && !hasProjects) return ""; // hide empty categories
-        return '<button class="filter-btn' + (cat === activeFilter ? " active" : "") + '" data-filter="' + escapeAttr(cat) + '">' + escapeHTML(cat) + "</button>";
+    function readHash() {
+      var h = decodeURIComponent((location.hash || "").replace("#", ""));
+      return groups.some(function (g) { return g.division.id === h; }) ? h : "all";
+    }
+
+    function renderTabs() {
+      var total = groups.reduce(function (n, g) { return n + g.projects.length; }, 0);
+      var tabs = [{ id: "all", name: "All", count: total }].concat(groups.map(function (g) {
+        return { id: g.division.id, name: g.division.name, count: g.projects.length };
+      }));
+      filterBar.innerHTML = tabs.map(function (t) {
+        return '<button class="filter-btn' + (t.id === active ? " active" : "") + '" data-filter="' + escapeAttr(t.id) + '">' +
+          escapeHTML(t.name) + ' <span class="filter-count">' + t.count + "</span></button>";
       }).join("");
     }
 
-    function renderGrid() {
-      var list = activeFilter === "All"
-        ? allProjects
-        : allProjects.filter(function (p) {
-            return (p.category || "Other").toLowerCase() === activeFilter.toLowerCase();
-          });
-
-      grid.innerHTML = "";
-      document.getElementById("emptyNote").hidden = list.length > 0;
-
-      list.forEach(function (p, i) {
-        var card = el(cardHTML(p, "c-" + (i % 4)));
-        grid.appendChild(card);
-        // Staggered entrance
-        setTimeout(function () { card.classList.add("shown"); }, 60 + i * 90);
+    function renderSections() {
+      var shown = active === "all" ? groups : groups.filter(function (g) { return g.division.id === active; });
+      document.getElementById("emptyNote").hidden = shown.length > 0;
+      holder.innerHTML = "";
+      var n = 0;
+      shown.forEach(function (g) {
+        var section = document.createElement("section");
+        section.className = "division";
+        section.id = "division-" + g.division.id;
+        section.innerHTML =
+          '<div class="section-head">' +
+            '<h2 class="section-label">' + escapeHTML(g.division.name) + "</h2>" +
+            '<span class="section-rule"></span>' +
+            '<span class="division-count">' + g.projects.length + (g.projects.length === 1 ? " project" : " projects") + "</span>" +
+          "</div>" +
+          (g.division.blurb ? '<p class="division-blurb">' + escapeHTML(g.division.blurb) + "</p>" : "") +
+          '<div class="work-grid"></div>';
+        var grid = section.querySelector(".work-grid");
+        g.projects.forEach(function (p, i) {
+          var card = el(cardHTML(p, "c-" + (i % 4)));
+          grid.appendChild(card);
+          setTimeout(function () { card.classList.add("shown"); }, 60 + (n++) * 90);
+        });
+        holder.appendChild(section);
       });
+    }
+
+    function select(id, updateHash) {
+      active = id;
+      renderTabs();
+      renderSections();
+      if (updateHash) {
+        try { history.replaceState(null, "", id === "all" ? location.pathname + location.search : "#" + id); } catch (e) {}
+      }
     }
 
     filterBar.addEventListener("click", function (e) {
       var btn = e.target.closest(".filter-btn");
       if (!btn) return;
-      activeFilter = btn.getAttribute("data-filter");
-      filterBar.querySelectorAll(".filter-btn").forEach(function (b) {
-        b.classList.toggle("active", b === btn);
-      });
-      renderGrid();
+      select(btn.getAttribute("data-filter"), true);
     });
+    window.addEventListener("hashchange", function () { if (groups.length) select(readHash(), false); });
 
     fetchProjects().then(function (projects) {
-      allProjects = projects;
-      renderFilters();
-      renderGrid();
+      groups = groupByDivision(projects);
+      active = readHash();
+      renderTabs();
+      renderSections();
+      if (!groups.length) {
+        var note = document.getElementById("emptyNote");
+        note.textContent = "No published projects yet.";
+        note.hidden = false;
+      }
     }).catch(function () {
+      holder.innerHTML = "";
       var note = document.getElementById("emptyNote");
       note.textContent = LOAD_ERROR_TEXT;
       note.hidden = false;
@@ -276,7 +329,7 @@
 
     var slug = new URLSearchParams(location.search).get("slug");
     if (!slug) {
-      wrap.innerHTML = '<div class="case-hero"><p class="loading-note">Project not found. <a class="case-back" href="portfolio.html">← Back to work</a></p></div>';
+      wrap.innerHTML = '<div class="case-hero"><p class="loading-note">Project not found. <a class="case-back" href="portfolio.html">← Back to portfolio</a></p></div>';
       return;
     }
 
@@ -291,7 +344,7 @@
           '<div class="case-hero">' +
             '<h1 class="case-title">Project not found</h1>' +
             '<p class="page-sub" style="margin-top:1.5rem;">This project may have been unpublished or the link is wrong.</p>' +
-            '<a class="case-back" style="margin-top:2.5rem; display:inline-block;" href="portfolio.html">← Back to work</a>' +
+            '<a class="case-back" style="margin-top:2.5rem; display:inline-block;" href="portfolio.html">← Back to portfolio</a>' +
           "</div>";
         return;
       }
@@ -305,7 +358,7 @@
 
       var html =
         '<div class="case-hero">' +
-          '<a class="case-back" href="portfolio.html">← All work</a>' +
+          '<a class="case-back" href="portfolio.html">← Portfolio</a>' +
           '<h1 class="case-title" data-reveal>' + escapeHTML(p.title) + "</h1>" +
           '<div class="case-meta" data-reveal>' +
             '<div class="case-meta-item"><span class="case-meta-label">Category</span><span class="case-meta-value">' + escapeHTML(p.category) + "</span></div>" +
@@ -345,6 +398,17 @@
 
       wrap.innerHTML = html;
 
+      // More projects from the same division
+      var division = divisionOf(p.category);
+      var related = projects.filter(function (x) { return x !== p && divisionOf(x.category) === division; }).slice(0, 3);
+      if (related.length) {
+        wrap.insertAdjacentHTML("beforeend",
+          '<div class="case-body"><div class="case-section case-related" data-reveal>' +
+            '<h2 class="case-section-label">More in ' + escapeHTML(division.name) + "</h2>" +
+            '<div class="related-grid">' + related.map(function (x) { return cardHTML(x, ""); }).join("") + "</div>" +
+          "</div></div>");
+      }
+
       // Prev / next project navigation
       var prev = idx > 0 ? projects[idx - 1] : null;
       var next = idx < projects.length - 1 ? projects[idx + 1] : null;
@@ -367,7 +431,7 @@
     }).catch(function () {
       wrap.innerHTML =
         '<div class="case-hero">' +
-          '<p class="loading-note">' + LOAD_ERROR_TEXT + ' <a class="case-back" href="portfolio.html">← Back to work</a></p>' +
+          '<p class="loading-note">' + LOAD_ERROR_TEXT + ' <a class="case-back" href="portfolio.html">← Back to portfolio</a></p>' +
         "</div>";
     });
   }

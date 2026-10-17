@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="admin.css?v=2" />
 </head>
 <body data-admin="dashboard">
 
@@ -50,8 +50,9 @@
         <div class="list-head">
           <h2>Projects <span class="count-badge" id="projectCount">0</span></h2>
           <p class="list-hint" id="statsLine">Loading…</p>
-          <p class="list-hint">Published projects appear on the public website automatically. Drag-free reordering: use the ↑ ↓ buttons.</p>
+          <p class="list-hint">Published projects appear on the public website automatically. Projects are grouped by division. Use the ↑ ↓ buttons to reorder within a division.</p>
         </div>
+        <div class="division-tabs" id="divisionTabs"></div>
         <div class="project-table" id="projectList">
           <p class="muted">Loading projects…</p>
         </div>
@@ -80,14 +81,17 @@
             <div class="field-row field-row-3">
               <label class="field">
                 <span>Category *</span>
+                <!-- Options are filled in from the division list in js/config.js -->
                 <select id="fCategory">
+                  <option>Video Editing</option>
+                  <option>Motion</option>
                   <option>Branding</option>
-                  <option>Social Media</option>
                   <option>Flyers</option>
                   <option>Posters</option>
+                  <option>Social Media</option>
+                  <option>Graphic Design</option>
                   <option>UI/UX</option>
                   <option>Photo Editing</option>
-                  <option>Motion</option>
                   <option>Other</option>
                 </select>
               </label>
@@ -121,7 +125,7 @@
               <textarea id="fResult" rows="3" placeholder="What was the final result?"></textarea>
             </label>
             <label class="field">
-              <span>Video URL — YouTube, Vimeo or direct video file (optional, for Motion work)</span>
+              <span>Video URL — YouTube, Vimeo or direct video file (optional, for Video &amp; Motion work)</span>
               <input type="text" id="fVideo" placeholder="https://www.youtube.com/watch?v=… or https://…/video.mp4" />
             </label>
             <div class="field-checks">
@@ -228,6 +232,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
   <script src="../js/config.js" defer></script>
-  <script src="admin.js?v=4" defer></script>
+  <script src="admin.js?v=5" defer></script>
 </body>
 </html>
