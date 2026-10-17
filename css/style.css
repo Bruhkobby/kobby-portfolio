@@ -451,6 +451,25 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
   max-width: 34rem;
 }
 
+/* ---------- Legal pages (terms / privacy) ---------- */
+.legal-text {
+  font-size: clamp(1rem, 1.3vw, 1.1rem);
+  line-height: 1.75;
+  max-width: 60ch;
+}
+.legal-text p + p,
+.legal-text p + ul,
+.legal-text ul + p { margin-top: 1rem; }
+.legal-text ul { display: grid; gap: 0.55rem; }
+.legal-text li { position: relative; padding-left: 1.6rem; }
+.legal-text li::before { content: "—"; position: absolute; left: 0; color: var(--accent); }
+.legal-text strong { font-weight: 500; }
+.legal-text a { border-bottom: 1px solid currentColor; transition: color 0.3s var(--ease); }
+.legal-text a:hover { color: var(--accent); }
+.form-note { font-size: 0.8rem; color: var(--muted); margin: 0; }
+.form-note a { border-bottom: 1px solid currentColor; }
+.form-note a:hover { color: var(--accent); }
+
 /* ---------- Project case study ---------- */
 .project-page { max-width: var(--max-w); margin: 0 auto; }
 .case-hero { padding: clamp(9rem, 18vh, 13rem) var(--gutter) 0; }
