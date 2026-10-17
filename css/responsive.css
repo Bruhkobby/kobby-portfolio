@@ -22,6 +22,8 @@
   .case-gallery .frame.tall { max-width: 80%; }
 
   .about-intro { grid-template-columns: 1fr; gap: 2rem; }
+  .about-me { grid-template-columns: 1fr; gap: 2rem; }
+  .about-photo { max-width: 26rem; }
   .about-cols { grid-template-columns: 1fr 1fr; }
 
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 2.2rem; }
