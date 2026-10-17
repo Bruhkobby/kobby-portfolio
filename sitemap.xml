@@ -35,4 +35,18 @@
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+  <!-- blog:start -->
+  <url>
+    <loc>https://bruhkobby.github.io/kobby-portfolio/blog.html</loc>
+    <lastmod>2026-10-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bruhkobby.github.io/kobby-portfolio/blog/what-a-brand-identity-includes.html</loc>
+    <lastmod>2026-10-17</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <!-- blog:end -->
 </urlset>

@@ -20,6 +20,14 @@
       link.classList.add("active");
     }
   });
+  // Blog posts belong to the Blog section
+  if (page === "post") {
+    document.querySelectorAll('[data-nav]').forEach(function (link) {
+      if ((link.getAttribute("href") || "").indexOf("blog") !== -1) {
+        link.classList.add("active");
+      }
+    });
+  }
   // project.html belongs to the Work section
   if (page === "project") {
     document.querySelectorAll('[data-nav]').forEach(function (link) {

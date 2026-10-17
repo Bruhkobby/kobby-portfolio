@@ -17,6 +17,8 @@
   .work-grid .project-card.c-3 { grid-column: 7 / span 6; }
 
   .case-section { grid-template-columns: 1fr; gap: 1rem; }
+  .post-layout { grid-template-columns: 1fr; gap: 1.6rem; }
+  .post-aside { position: static; grid-auto-flow: column; justify-content: start; gap: 2.4rem; }
   .case-gallery .frame.tall { max-width: 80%; }
 
   .about-intro { grid-template-columns: 1fr; gap: 2rem; }
@@ -86,6 +88,10 @@
   .contact-value { font-size: 1.05rem; }
 
   .about-cols { grid-template-columns: 1fr; }
+
+  /* Blog list stacks */
+  .post-row { grid-template-columns: 1fr; gap: 0.6rem; }
+  .post-tag { text-align: left; }
 
   .footer-grid { grid-template-columns: 1fr; gap: 1.8rem; }
   .footer-bottom { flex-direction: column; gap: 0.4rem; }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Kobby — Blog</title>
+    <link>https://bruhkobby.github.io/kobby-portfolio/blog.html</link>
+    <description>Practical notes on branding, graphic design, motion and video, written for business owners and fellow creatives.</description>
+    <language>en</language>
+    <item>
+      <title>What a Brand Identity Actually Includes (and What You Should Receive)</title>
+      <link>https://bruhkobby.github.io/kobby-portfolio/blog/what-a-brand-identity-includes.html</link>
+      <guid>https://bruhkobby.github.io/kobby-portfolio/blog/what-a-brand-identity-includes.html</guid>
+      <pubDate>Sat, 17 Oct 2026 06:00:00 +0000</pubDate>
+      <category>Branding</category>
+      <description>A logo is only the start. Here is what a full brand identity includes, and the questions to ask so you know exactly what you are paying for.</description>
+    </item>
+  </channel>
+</rss>

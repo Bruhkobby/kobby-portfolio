@@ -157,6 +157,7 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
 .mobile-menu.open nav a:nth-child(3) { transition-delay: 0.27s; }
 .mobile-menu.open nav a:nth-child(4) { transition-delay: 0.33s; }
 .mobile-menu.open nav a:nth-child(5) { transition-delay: 0.39s; }
+.mobile-menu.open nav a:nth-child(6) { transition-delay: 0.45s; }
 .mobile-menu nav a span {
   font-family: var(--font-body);
   font-size: 0.75rem;
@@ -469,6 +470,105 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
 .form-note { font-size: 0.8rem; color: var(--muted); margin: 0; }
 .form-note a { border-bottom: 1px solid currentColor; }
 .form-note a:hover { color: var(--accent); }
+
+/* ---------- Blog ---------- */
+.post-list { border-top: 1px solid var(--line); }
+.post-row {
+  display: grid;
+  grid-template-columns: 9rem 1fr auto;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: clamp(1.6rem, 3vw, 2.4rem) 0;
+  border-bottom: 1px solid var(--line);
+  transition: padding-left 0.4s var(--ease);
+}
+.post-row:hover { padding-left: 0.8rem; }
+.post-date, .post-tag {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.post-tag { text-align: right; }
+.post-row-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.7vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1.15;
+  transition: color 0.35s var(--ease);
+}
+.post-row:hover .post-row-title { color: var(--accent); }
+.post-excerpt { color: var(--muted); font-size: 0.95rem; max-width: 56ch; margin-top: 0.7rem; }
+.post-empty { color: var(--muted); padding: 3rem 0; }
+
+.post-kicker {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1.4rem;
+}
+.post-kicker a { transition: color 0.3s var(--ease); }
+.post-kicker a:hover { color: var(--accent); }
+.page-title.post-h1 { font-size: clamp(1.9rem, 4.6vw, 3.9rem); line-height: 1.08; max-width: 24ch; }
+
+.post-layout {
+  display: grid;
+  grid-template-columns: 4fr 7fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  padding: clamp(1rem, 3vw, 2.5rem) 0 clamp(3rem, 7vw, 6rem);
+}
+.post-aside { align-self: start; position: sticky; top: 7rem; display: grid; gap: 1.4rem; }
+.post-aside .case-meta-item { display: grid; gap: 0.3rem; }
+
+.prose { font-size: clamp(1.02rem, 1.4vw, 1.15rem); line-height: 1.8; max-width: 64ch; }
+.prose > * + * { margin-top: 1.25em; }
+.prose h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 2.7vw, 2.05rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-top: 2.6em;
+}
+.prose h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1.8vw, 1.3rem);
+  font-weight: 600;
+  margin-top: 2em;
+}
+.prose h2 + *, .prose h3 + * { margin-top: 0.8em; }
+.prose ul, .prose ol { display: grid; gap: 0.6em; }
+.prose ul li { position: relative; padding-left: 1.6rem; }
+.prose ul li::before { content: "—"; position: absolute; left: 0; color: var(--accent); }
+.prose ol { list-style: decimal; padding-left: 1.4rem; }
+.prose ol li::marker { color: var(--accent); }
+.prose strong { font-weight: 500; }
+.prose em { font-style: italic; }
+.prose a { border-bottom: 1px solid currentColor; transition: color 0.3s var(--ease); }
+.prose a:hover { color: var(--accent); }
+.prose blockquote {
+  border-left: 2px solid var(--accent);
+  padding-left: 1.4rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.prose hr { border: 0; border-top: 1px solid var(--line); margin: 2.6em 0; }
+.prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.88em;
+  background: var(--bg-soft);
+  padding: 0.12em 0.4em;
+}
+.prose table { width: 100%; border-collapse: collapse; font-size: 0.92em; line-height: 1.5; }
+.prose th, .prose td { text-align: left; padding: 0.8rem 1rem 0.8rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.prose th {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.prose .sources { font-size: 0.92em; color: var(--muted); }
 
 /* ---------- Project case study ---------- */
 .project-page { max-width: var(--max-w); margin: 0 auto; }

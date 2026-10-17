@@ -1,0 +1,78 @@
+name: Publish blog
+
+# Blog posts live in blog-src/posts/ and each one has a date in its file name
+# (YYYY-MM-DD-title.md). Every day this job builds the blog and publishes any
+# post whose date has arrived. Posts dated in the future stay hidden until
+# their day, so you can write them ahead of time.
+
+on:
+  schedule:
+    - cron: "5 5 * * *"        # every day at 05:05 UTC
+  push:
+    branches: [main]
+    paths: ["blog-src/**"]     # also run when a post is added or edited
+  workflow_dispatch:           # run it by hand from the Actions tab
+    inputs:
+      as_of:
+        description: "Optional: build as if today were this date (YYYY-MM-DD)"
+        required: false
+
+permissions:
+  contents: write              # to commit the built pages
+  pages: write                 # to ask GitHub Pages to rebuild
+
+concurrency:
+  group: publish-blog
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Markdown
+        run: pip install markdown==3.10.3
+
+      - name: Build the blog
+        env:
+          AS_OF: ${{ inputs.as_of }}
+        run: |
+          if [ -n "$AS_OF" ]; then
+            python blog-src/build.py --as-of "$AS_OF"
+          else
+            python blog-src/build.py
+          fi
+
+      - name: Commit new pages
+        id: commit
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A blog.html blog sitemap.xml
+          if git diff --cached --quiet; then
+            echo "Nothing new to publish."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "Publish scheduled blog posts"
+          git pull --rebase --autostash origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Ask GitHub Pages to rebuild
+        if: steps.commit.outputs.changed == 'true' && github.ref_name == github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Pushes made with the built-in token don't always trigger a Pages
+          # build on their own, so ask for one explicitly.
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" \
+            || echo "Could not request a Pages build (it may already be running)."
