@@ -1,6 +1,6 @@
 /* ============================================================
    KOBBY — Portfolio
-   portfolio.js — loads projects (Supabase or demo data) and
+   portfolio.js — loads published projects from Supabase and
    renders the homepage, portfolio grid and case-study pages.
    ============================================================ */
 
@@ -13,14 +13,14 @@
      DATA LAYER
      ============================================================ */
 
-  function isDemoMode() {
-    return !(window.sb && window.SUPABASE_CONFIGURED);
-  }
+  var LOAD_ERROR_TEXT = "Projects couldn't be loaded right now. Please refresh in a moment.";
 
   // Fetch published projects from Supabase, with images ordered.
+  // Rejects if the database can't be reached — the site never shows
+  // placeholder projects, so callers show LOAD_ERROR_TEXT instead.
   function fetchProjects() {
-    if (isDemoMode()) {
-      return Promise.resolve(normalizeAll(window.DEMO_PROJECTS || []));
+    if (!(window.sb && window.SUPABASE_CONFIGURED)) {
+      return Promise.reject(new Error("Supabase client is not available"));
     }
     return window.sb
       .from("projects")
@@ -35,12 +35,11 @@
       })
       .catch(function (err) {
         console.error("Could not load projects:", err);
-        // Graceful fallback so the site never appears broken.
-        return normalizeAll(window.DEMO_PROJECTS || []);
+        throw err;
       });
   }
 
-  // Convert a Supabase row (or demo object) into one predictable shape.
+  // Convert a Supabase row into one predictable shape.
   function normalizeProject(p) {
     var images = (p.project_images || p.images || [])
       .slice()
@@ -135,6 +134,9 @@
       }
 
       document.dispatchEvent(new CustomEvent("content:updated"));
+    }).catch(function () {
+      if (featuredWrap) featuredWrap.innerHTML = '<p class="loading-note">' + LOAD_ERROR_TEXT + "</p>";
+      if (selectedWrap) selectedWrap.innerHTML = "";
     });
   }
 
@@ -192,6 +194,10 @@
       allProjects = projects;
       renderFilters();
       renderGrid();
+    }).catch(function () {
+      var note = document.getElementById("emptyNote");
+      note.textContent = LOAD_ERROR_TEXT;
+      note.hidden = false;
     });
   }
 
@@ -316,6 +322,11 @@
 
       document.dispatchEvent(new CustomEvent("content:updated"));
       window.scrollTo(0, 0);
+    }).catch(function () {
+      wrap.innerHTML =
+        '<div class="case-hero">' +
+          '<p class="loading-note">' + LOAD_ERROR_TEXT + ' <a class="case-back" href="portfolio.html">← Back to work</a></p>' +
+        "</div>";
     });
   }
 

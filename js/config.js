@@ -6,9 +6,6 @@
    3. Copy the "Project URL" and the "anon public" key.
    4. Paste them between the quotes below.
 
-   While these two values are empty, the website runs in
-   DEMO MODE with sample projects (see js/demo-data.js).
-
    IMPORTANT: Only use the ANON (public) key here.
    NEVER put your service_role key in any frontend file.
    ============================================================ */
