@@ -45,6 +45,7 @@
     var name = document.getElementById("cfName").value.trim();
     var email = document.getElementById("cfEmail").value.trim();
     var message = document.getElementById("cfMessage").value.trim();
+    var phone = (document.getElementById("cfPhone") || { value: "" }).value.trim();
     var company = document.getElementById("cfCompany").value; // honeypot
 
     status.hidden = false;
@@ -79,7 +80,7 @@
     }
 
     window.sb.from("messages")
-      .insert({ name: name, email: email, message: message })
+      .insert(phone ? { name: name, email: email, message: message, phone: phone } : { name: name, email: email, message: message })
       .then(function (res) {
         if (res.error) throw res.error;
         finish();

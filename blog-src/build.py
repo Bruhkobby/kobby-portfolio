@@ -27,6 +27,7 @@ import markdown
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 POSTS_DIR = ROOT / "blog-src" / "posts"
+ADMIN_POSTS_DIR = ROOT / "blog-src" / "posts-admin"   # copied from the admin by fetch_admin_posts.py
 OUT_DIR = ROOT / "blog"
 SITE = "https://bruhkobby.github.io/kobby-portfolio/"
 AUTHOR = "Kobby"
@@ -69,13 +70,15 @@ def parse_post(path):
         "category": meta["category"],
         "date": date,
         "updated": dt.date.fromisoformat(meta["updated"]) if meta.get("updated") else date,
+        "source": meta.get("source", "file"),
         "minutes": max(1, math.ceil(words / 220)),
         "html": body_html,
     }
 
 
 def load_posts(as_of):
-    posts = [parse_post(p) for p in sorted(POSTS_DIR.glob("*.md"))]
+    files = sorted(POSTS_DIR.glob("*.md")) + sorted(ADMIN_POSTS_DIR.glob("*.md"))
+    posts = [parse_post(p) for p in files]
     slugs = [p["slug"] for p in posts]
     if len(slugs) != len(set(slugs)):
         sys.exit("two posts share the same slug")
@@ -283,6 +286,15 @@ def build_sitemap(posts):
     sm.write_text(s, encoding="utf-8")
 
 
+def build_manifest(live, upcoming):
+    """blog/posts.json: lets the admin show which posts are live or scheduled."""
+    def entry(p, status):
+        return {"slug": p["slug"], "title": p["title"], "date": p["date"].isoformat(),
+                "category": p["category"], "status": status, "source": p["source"]}
+    data = {"posts": [entry(p, "live") for p in live] + [entry(p, "scheduled") for p in upcoming]}
+    (OUT_DIR / "posts.json").write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--as-of", help="build as if today were this date (YYYY-MM-DD)")
@@ -293,7 +305,7 @@ def main():
     head, tail = load_template()
 
     OUT_DIR.mkdir(exist_ok=True)
-    wanted = {f"{p['slug']}.html" for p in live} | {"feed.xml"}
+    wanted = {f"{p['slug']}.html" for p in live} | {"feed.xml", "posts.json"}
     for old in OUT_DIR.iterdir():
         if old.name not in wanted:
             old.unlink()
@@ -305,6 +317,7 @@ def main():
         build_post(head, tail, p, newer, older)
     build_feed(live)
     build_sitemap(live)
+    build_manifest(live, upcoming)
 
     print(f"as of {as_of}: {len(live)} live, {len(upcoming)} scheduled")
     for p in live:

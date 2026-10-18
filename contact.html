@@ -130,6 +130,10 @@
           </label>
         </div>
         <label class="form-field">
+          <span>WhatsApp or phone <em class="optional">(optional, if you'd like a reply there)</em></span>
+          <input type="tel" id="cfPhone" name="phone" maxlength="40" autocomplete="tel" placeholder="+233 …" />
+        </label>
+        <label class="form-field">
           <span>Message</span>
           <textarea id="cfMessage" name="message" rows="6" maxlength="4000" placeholder="Tell me about your project — what do you need, and when?" required></textarea>
         </label>
@@ -137,7 +141,7 @@
         <div class="hp-field" aria-hidden="true">
           <label>Company <input type="text" id="cfCompany" name="company" tabindex="-1" autocomplete="off" /></label>
         </div>
-        <p class="form-note">Your name, email and message are used only to reply to you. See the <a href="privacy.html">Privacy Policy</a>.</p>
+        <p class="form-note">Your name, email, message and phone number (if you add one) are used only to reply to you. See the <a href="privacy.html">Privacy Policy</a>.</p>
         <p class="form-status" id="cfStatus" role="status"></p>
         <button type="submit" class="btn-line" id="cfSubmit">Send message<span class="cta-arrow">→</span></button>
       </form>
@@ -203,5 +207,6 @@
   <script src="js/main.js?v=5" defer></script>
   <script src="js/animations.js?v=2" defer></script>
   <script src="js/motion.js?v=1" defer></script>
+  <script src="js/live.js?v=1" defer></script>
 </body>
 </html>

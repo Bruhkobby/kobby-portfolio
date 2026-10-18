@@ -12,6 +12,12 @@
   /* ============================================================
      GUARD: Supabase must be configured
      ============================================================ */
+  // Remember (in this browser only) that this is the site owner, so the
+  // owner's own visits are not counted in the Stats tab.
+  function markOwner() {
+    try { localStorage.setItem("kobbyOwner", "1"); } catch (e) {}
+  }
+
   function requireSupabase() {
     if (!(window.sb && window.SUPABASE_CONFIGURED)) {
       if (notConfiguredEl) notConfiguredEl.hidden = false;
@@ -29,6 +35,7 @@
     // Already signed in? Go straight to the dashboard.
     window.sb.auth.getSession().then(function (res) {
       if (res.data && res.data.session) {
+        markOwner();
         location.href = "dashboard.html";
       }
     });
@@ -49,6 +56,7 @@
       window.sb.auth.signInWithPassword({ email: email, password: password })
         .then(function (res) {
           if (res.error) throw res.error;
+          markOwner();
           location.href = "dashboard.html";
         })
         .catch(function (err) {
@@ -67,7 +75,10 @@
     projects: [],
     editingId: null,   // null = new project
     editingImages: [], // images of the project being edited
-    divisionFilter: "all"
+    divisionFilter: "all",
+    messages: [],
+    inboxFilter: "all",
+    inboxSearch: ""
   };
 
   /* ---------- Divisions (shared list in js/config.js) ---------- */
@@ -134,7 +145,10 @@
       if (emailEl) emailEl.textContent = user.email || "";
       var accEmail = $("accountEmail");
       if (accEmail) accEmail.textContent = user.email || "";
-      loadProjects();
+      markOwner();
+      loadProjects().then(function () {
+        if (window.AdminPanels && window.AdminPanels.overview) window.AdminPanels.overview.show();
+      });
     });
 
     // Signed out elsewhere → redirect
@@ -166,7 +180,7 @@
     $("videoInput").addEventListener("change", uploadVideo);
 
     // ---- Tabs (Projects / Inbox / Account) ----
-    var tabSections = ["projectsTab", "inboxTab", "accountTab"];
+    var tabSections = ["overviewTab", "projectsTab", "inboxTab", "siteTab", "statsTab", "blogTab", "accountTab"];
     document.querySelectorAll(".tab-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
         document.querySelectorAll(".tab-btn").forEach(function (b) {
@@ -178,6 +192,8 @@
           if (section) section.hidden = id !== active + "Tab";
         });
         if (active === "inbox") loadInbox();
+        if (window.AdminPanels && window.AdminPanels[active]) window.AdminPanels[active].show();
+        if (active === "account") loadActivityLog();
       });
     });
 
@@ -188,24 +204,43 @@
 
     // ---- Inbox ----
     loadInboxCount();
+    $("inboxSearch").addEventListener("input", function () { state.inboxSearch = this.value.trim().toLowerCase(); renderInbox(); });
+    $("inboxFilters").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-filter]");
+      if (!b) return;
+      state.inboxFilter = b.getAttribute("data-filter");
+      renderInbox();
+    });
+
+    // ---- Project editor extras ----
+    $("previewBtn").addEventListener("click", function () { if (state.editingId) previewProject(currentEditing()); });
+    $("copyLinkBtn").addEventListener("click", function () { if (state.editingId) copyProjectLink(currentEditing(), $("copyLinkBtn")); });
+    $("templateBtn").addEventListener("click", insertTemplate);
+    $("clearScheduleBtn").addEventListener("click", function () { $("fPublishAt").value = ""; });
+  }
+
+  function currentEditing() {
+    return state.projects.find(function (x) { return x.id === state.editingId; }) || { slug: slugify($("fSlug").value || $("fTitle").value) };
   }
 
   /* ============================================================
      PROJECT LIST
      ============================================================ */
   function loadProjects() {
-    window.sb
+    return window.sb
       .from("projects")
-      .select("*, project_images(image_url, image_order)")
+      .select("*, project_images(id, image_url, image_order, alt_text)")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
       .then(function (res) {
         if (res.error) throw res.error;
         state.projects = res.data || [];
         renderProjectList();
+        return state.projects;
       })
       .catch(function (err) {
         $("projectList").innerHTML = '<p class="muted">Could not load projects: ' + escapeHTML(err.message) + "</p>";
+        return [];
       });
   }
 
@@ -229,13 +264,21 @@
     }).join("");
   }
 
+  function isScheduled(p) {
+    return Boolean(p.published && p.publish_at && new Date(p.publish_at).getTime() > Date.now());
+  }
+  function shortDate(iso) {
+    return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  }
+
   function renderProjectList() {
     var wrap = $("projectList");
     $("projectCount").textContent = state.projects.length;
     var pub = state.projects.filter(function (p) { return p.published; }).length;
+    var sched = state.projects.filter(isScheduled).length;
     var statsEl = $("statsLine");
     if (statsEl) {
-      statsEl.textContent = state.projects.length + " total · " + pub + " published · " + (state.projects.length - pub) + " drafts";
+      statsEl.textContent = state.projects.length + " total · " + pub + " published · " + (state.projects.length - pub) + " drafts" + (sched ? " · " + sched + " scheduled" : "");
     }
     renderDivisionTabs();
 
@@ -263,7 +306,10 @@
           '<div class="project-main">' +
             '<div class="project-name">' + escapeHTML(p.title) + "</div>" +
             '<div class="project-sub">' +
-              '<span class="badge ' + (p.published ? "badge-published" : "badge-draft") + '">' + (p.published ? "Published" : "Draft") + "</span>" +
+              (isScheduled(p)
+                ? '<span class="badge badge-scheduled">Goes live ' + escapeHTML(shortDate(p.publish_at)) + "</span>"
+                : '<span class="badge ' + (p.published ? "badge-published" : "badge-draft") + '">' + (p.published ? "Published" : "Draft") + "</span>") +
+              (coverOf(p) ? "" : '<span class="badge badge-warn">No cover image</span>') +
               (p.featured ? '<span class="badge badge-featured">Featured</span>' : "") +
               escapeHTML(p.category) + (p.year ? " · " + escapeHTML(p.year) : "") +
             "</div>" +
@@ -272,6 +318,9 @@
             '<button class="btn btn-ghost btn-sm" data-act="up" title="Move up"' + (gi === 0 ? " disabled" : "") + ">↑</button>" +
             '<button class="btn btn-ghost btn-sm" data-act="down" title="Move down"' + (gi === group.length - 1 ? " disabled" : "") + ">↓</button>" +
             '<label class="toggle' + (p.published ? " on" : "") + '" title="Publish / unpublish"><input type="checkbox" data-act="publish" style="display:none"' + (p.published ? " checked" : "") + " /></label>" +
+            '<button class="btn btn-ghost btn-sm" data-act="preview" title="See it as visitors will">Preview</button>' +
+            '<button class="btn btn-ghost btn-sm" data-act="link" title="Copy the public link">Link</button>' +
+            '<button class="btn btn-ghost btn-sm" data-act="dup" title="Make a copy as a draft">Copy</button>' +
             '<button class="btn btn-ghost btn-sm" data-act="edit">Edit</button>' +
             '<button class="btn btn-danger btn-sm" data-act="delete">Delete</button>' +
           "</div>";
@@ -283,6 +332,9 @@
           if (action === "edit") openEditor(p.id);
           else if (action === "publish") togglePublished(p);
           else if (action === "delete") deleteProject(p);
+          else if (action === "preview") previewProject(p);
+          else if (action === "link") copyProjectLink(p, act);
+          else if (action === "dup") duplicateProject(p);
           else if (action === "up") moveProject(group, gi, -1);
           else if (action === "down") moveProject(group, gi, 1);
         });
@@ -298,6 +350,7 @@
       .then(function (res) {
         if (res.error) throw res.error;
         p.published = !p.published;
+        logActivity(p.published ? "Published project" : "Unpublished project", p.title);
         renderProjectList();
       })
       .catch(function (err) { alert("Could not update: " + err.message); });
@@ -337,9 +390,95 @@
       })
       .then(function (res) {
         if (res.error) throw res.error;
+        logActivity("Deleted project", p.title);
         loadProjects();
       })
       .catch(function (err) { alert("Could not delete: " + err.message); });
+  }
+
+  /* ============================================================
+     PROJECT EXTRAS: preview, public link, duplicate, templates, log
+     ============================================================ */
+  function publicUrl(p, preview) {
+    return new URL("../project.html?slug=" + encodeURIComponent(p.slug) + (preview ? "&preview=1" : ""), location.href).href;
+  }
+  function previewProject(p) {
+    window.open(publicUrl(p, true), "_blank", "noopener");
+  }
+  function copyProjectLink(p, btn) {
+    var url = publicUrl(p, false);
+    var old = btn.textContent;
+    var done = function (msg) { btn.textContent = msg; setTimeout(function () { btn.textContent = old; }, 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () { done("Copied ✓"); }, function () { window.prompt("Copy this link:", url); });
+    } else {
+      window.prompt("Copy this link:", url);
+    }
+  }
+
+  function duplicateProject(p) {
+    if (!confirm('Make a draft copy of "' + p.title + '"? The text is copied; add the images to the copy yourself.')) return;
+    var base = p.slug + "-copy", slug = base, n = 2;
+    while (state.projects.some(function (x) { return x.slug === slug; })) slug = base + "-" + n++;
+    var nextOrder = state.projects.reduce(function (m, x) { return Math.max(m, x.sort_order || 0); }, 0) + 1;
+    window.sb.from("projects").insert({
+      title: p.title + " (copy)", slug: slug, category: p.category, client: p.client, year: p.year,
+      brief: p.brief, objective: p.objective, creative_direction: p.creative_direction, process: p.process,
+      result: p.result, video_url: p.video_url, featured: false, published: false, sort_order: nextOrder
+    }).select().single().then(function (res) {
+      if (res.error) throw res.error;
+      logActivity("Duplicated project", p.title);
+      return loadProjects().then(function () { openEditor(res.data.id); });
+    }).catch(function (err) { alert("Could not copy: " + err.message); });
+  }
+
+  // Starter text for common project types. Only fills boxes that are empty,
+  // and the [square brackets] are reminders for you to replace.
+  var TEMPLATES = {
+    brand: { brief: "[Client name] needed a brand identity that [what they wanted]. They had [what they started with].", objective: "Create a recognisable identity that [goal], and works across [where it is used].", creative_direction: "I built the look around [idea]. Colours: [colours]. Type: [fonts].", process: "Research and moodboard, three logo directions, one refined route, then the full set of files and guidelines.", result: "[Client] now has a complete identity: [what was delivered]. [Result so far.]" },
+    flyer: { brief: "[Client/event] needed a flyer for [event or offer] on [date].", objective: "Get people to notice it quickly and know [what to do next].", creative_direction: "A bold layout with [image/type idea] so the key message reads at a glance. Colours: [colours].", process: "Quick sketches, a first layout, then changes based on the client's feedback.", result: "Delivered print-ready and social versions. [Response or result.]" },
+    video: { brief: "[Client] had [raw footage] and wanted a [type of video] for [where it will be shown].", objective: "Tell the story in [length] and keep people watching to the end.", creative_direction: "Pace: [fast/calm]. Colour grade: [look]. Music and sound: [choice]. Text and motion: [style].", process: "Sorted and selected footage, rough cut, music and sound, colour and graphics, then final export.", result: "Final video delivered in [formats]. [Views or reaction.]" },
+    social: { brief: "[Client] needed a consistent set of posts for [platform] to [goal].", objective: "Make the page look professional and recognisable in the feed.", creative_direction: "A repeatable template with [colours/fonts/layout idea] so every post feels like the same brand.", process: "Designed a master template, adapted it for each post type, then delivered editable files.", result: "[Number] designs delivered. [Result so far.]" }
+  };
+  function insertTemplate() {
+    var key = $("templateSelect").value;
+    var t = TEMPLATES[key];
+    if (!t) return;
+    var map = { brief: "fBrief", objective: "fObjective", creative_direction: "fCreative", process: "fProcess", result: "fResult" };
+    var filled = 0;
+    Object.keys(map).forEach(function (k) {
+      var box = $(map[k]);
+      if (!box.value.trim()) { box.value = t[k]; filled++; }
+    });
+    $("templateStatus").textContent = filled
+      ? "Added starter text to " + filled + " empty box" + (filled > 1 ? "es" : "") + ". Replace everything in [square brackets]."
+      : "All boxes already have text, so nothing was changed.";
+  }
+
+  // Quietly records what you did (shown in Overview and Account). Never blocks anything.
+  function logActivity(action, detail) {
+    if (!(window.sb && window.SUPABASE_CONFIGURED)) return;
+    try {
+      window.sb.from("activity_log").insert({ action: action, detail: detail ? String(detail).slice(0, 280) : null })
+        .then(function () {}, function () {});
+    } catch (e) {}
+  }
+
+  function loadActivityLog() {
+    var box = $("activityFull");
+    if (!box) return;
+    window.sb.from("activity_log").select("*").order("created_at", { ascending: false }).limit(50).then(function (res) {
+      if (res.error) { box.innerHTML = '<li class="muted">Could not load the log.</li>'; return; }
+      var rows = res.data || [];
+      box.innerHTML = rows.length ? rows.map(function (r) {
+        return "<li><span>" + escapeHTML(r.action) + (r.detail ? " — " + escapeHTML(r.detail) : "") + '</span><time class="muted small">' + escapeHTML(niceTime(r.created_at)) + "</time></li>";
+      }).join("") : '<li class="muted">Nothing recorded yet. Your changes will appear here.</li>';
+    });
+  }
+
+  function niceTime(iso) {
+    var d = new Date(iso);
+    return d.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + " · " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
   }
 
   /* ============================================================
@@ -363,6 +502,11 @@
     $("saveStatus").textContent = "";
     $("uploadStatus").textContent = "";
     $("imageInput").value = "";
+    $("templateStatus").textContent = "";
+    $("templateSelect").value = "";
+    $("fPublishAt").value = "";
+    $("previewBtn").hidden = !projectId;
+    $("copyLinkBtn").hidden = !projectId;
 
     if (projectId) {
       var p = state.projects.find(function (x) { return x.id === projectId; });
@@ -382,6 +526,7 @@
       $("fVideo").value = p.video_url || "";
       $("fFeatured").checked = Boolean(p.featured);
       $("fPublished").checked = Boolean(p.published);
+      $("fPublishAt").value = p.publish_at ? toLocalInput(p.publish_at) : "";
       loadEditorImages(projectId);
     } else {
       $("editorTitle").textContent = "New Project";
@@ -396,6 +541,13 @@
     $("listView").hidden = true;
     $("editorView").hidden = false;
     window.scrollTo(0, 0);
+  }
+
+  // <input type="datetime-local"> wants local time without a zone
+  function toLocalInput(iso) {
+    var d = new Date(iso);
+    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
   }
 
   function saveProject(e) {
@@ -421,8 +573,16 @@
       video_url: $("fVideo").value.trim(),
       featured: $("fFeatured").checked,
       published: $("fPublished").checked,
+      publish_at: $("fPublishAt").value ? new Date($("fPublishAt").value).toISOString() : null,
       updated_at: new Date().toISOString()
     };
+
+    // Don't publish starter text that still has [placeholders] in it.
+    if (payload.published) {
+      var leftover = [payload.brief, payload.objective, payload.creative_direction, payload.process, payload.result]
+        .some(function (t) { return /\[[^\]]{2,}\]/.test(t || ""); });
+      if (leftover && !confirm("Some text still has [square brackets] from the starter text. Publish anyway?")) return;
+    }
 
     var btn = $("saveBtn");
     btn.disabled = true;
@@ -432,6 +592,9 @@
       btn.disabled = false;
       btn.textContent = "Save Project";
       $("saveStatus").textContent = "Saved ✓";
+      $("previewBtn").hidden = false;
+      $("copyLinkBtn").hidden = false;
+      logActivity(isNew ? "Created project" : "Edited project", title);
       state.editingId = id;
       $("editorTitle").textContent = "Edit Project";
       $("addImagesBtn").disabled = false;
@@ -507,7 +670,19 @@
         (i === 0 ? '<span class="cover-tag">Cover</span>' : "") +
         '<button class="icon-btn" data-act="up" title="Move up"' + (i === 0 ? " disabled" : "") + ">↑</button>" +
         '<button class="icon-btn" data-act="down" title="Move down"' + (i === state.editingImages.length - 1 ? " disabled" : "") + ">↓</button>" +
-        '<button class="icon-btn danger" data-act="del" title="Delete image">×</button>';
+        '<button class="icon-btn danger" data-act="del" title="Delete image">×</button>' +
+        '<input class="alt-input" type="text" maxlength="300" placeholder="Describe this image (helps Google and screen readers)" value="' + escapeAttr(img.alt_text || "") + '" aria-label="Image description" />';
+
+      var altBox = item.querySelector(".alt-input");
+      altBox.addEventListener("change", function () {
+        var v = altBox.value.trim();
+        window.sb.from("project_images").update({ alt_text: v || null }).eq("id", img.id).then(function (res) {
+          if (res.error) { alert("Could not save the description: " + res.error.message); return; }
+          img.alt_text = v;
+          altBox.classList.add("saved");
+          setTimeout(function () { altBox.classList.remove("saved"); }, 1200);
+        });
+      });
 
       item.addEventListener("click", function (e) {
         var btn = e.target.closest("[data-act]");
@@ -528,13 +703,21 @@
     var nextOrder = state.editingImages.reduce(function (m, im) { return Math.max(m, im.image_order || 0); }, -1) + 1;
     var uploaded = 0;
 
-    files.forEach(function (file, idx) {
-      var ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      var path = state.editingId + "/" + Date.now() + "-" + idx + "-" + slugify(file.name.replace(/\.[^.]+$/, "")) + "." + ext;
-      status.textContent = "Uploading " + (uploaded + 1) + " / " + files.length + "…";
-
-      window.sb.storage.from(window.SUPABASE_BUCKET).upload(path, file, { cacheControl: "3600", upsert: false })
+    var saved = 0;
+    files.forEach(function (original, idx) {
+      status.textContent = "Preparing " + (idx + 1) + " / " + files.length + "…";
+      var optimise = $("optimiseImages").checked ? optimiseImage(original) : Promise.resolve(original);
+      var file = original;
+      optimise.then(function (f) {
+        file = f;
+        saved += Math.max(0, original.size - f.size);
+        var ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        var path = state.editingId + "/" + Date.now() + "-" + idx + "-" + slugify(file.name.replace(/\.[^.]+$/, "")) + "." + ext;
+        status.textContent = "Uploading " + (uploaded + 1) + " / " + files.length + "…";
+        return window.sb.storage.from(window.SUPABASE_BUCKET).upload(path, file, { cacheControl: "31536000", upsert: false }).then(function (res) { res.__path = path; return res; });
+      })
         .then(function (res) {
+          var path = res.__path;
           if (res.error) throw res.error;
           var pub = window.sb.storage.from(window.SUPABASE_BUCKET).getPublicUrl(path);
           return window.sb.from("project_images").insert({
@@ -547,7 +730,8 @@
           if (res.error) throw res.error;
           uploaded++;
           if (uploaded === files.length) {
-            status.textContent = "Upload complete ✓";
+            status.textContent = "Upload complete ✓" + (saved > 50000 ? " — images shrunk by " + Math.round(saved / 1024) + " KB so the site loads faster." : "");
+            logActivity("Uploaded images", files.length + " to " + ((state.projects.find(function (x) { return x.id === state.editingId; }) || {}).title || "a project"));
             $("imageInput").value = "";
             loadEditorImages(state.editingId);
           }
@@ -556,6 +740,26 @@
           status.textContent = "Upload failed: " + err.message;
         });
     });
+  }
+
+  // Shrinks big photos (max 2400px on the long side, WebP) so pages load fast.
+  // Falls back to the original file if anything goes wrong or it wouldn't be smaller.
+  function optimiseImage(file) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) || !window.createImageBitmap) return Promise.resolve(file);
+    return createImageBitmap(file).then(function (bmp) {
+      var MAX = 2400, r = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+      var w = Math.max(1, Math.round(bmp.width * r)), h = Math.max(1, Math.round(bmp.height * r));
+      var c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(bmp, 0, 0, w, h);
+      if (bmp.close) bmp.close();
+      return new Promise(function (resolve) {
+        c.toBlob(function (blob) {
+          if (!blob || blob.type !== "image/webp" || (r === 1 && blob.size >= file.size * 0.95)) { resolve(file); return; }
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, "") + ".webp", { type: "image/webp" }));
+        }, "image/webp", 0.86);
+      });
+    }).catch(function () { return file; });
   }
 
   function uploadVideo(e) {
@@ -634,6 +838,8 @@
       });
   }
 
+  var STATUS_LABELS = { "new": "New", in_progress: "In progress", replied: "Replied", booked: "Booked", closed: "Closed" };
+
   function loadInbox() {
     var list = $("inboxList");
     if (!list) return;
@@ -641,24 +847,60 @@
       list.innerHTML = '<p class="muted">Connect Supabase first (see the README) — then contact-form messages will appear here.</p>';
       return;
     }
-    window.sb.from("messages")
+    return window.sb.from("messages")
       .select("*")
       .order("created_at", { ascending: false })
       .then(function (res) {
         if (res.error) throw res.error;
-        var msgs = res.data || [];
-        renderInbox(msgs);
+        state.messages = res.data || [];
+        renderInbox();
         loadInboxCount();
+        return state.messages;
       })
       .catch(function (err) {
         list.innerHTML = '<p class="muted">Could not load messages: ' + escapeHTML(err.message) + "</p>";
+        return [];
       });
   }
 
-  function renderInbox(msgs) {
+  function isOpenMessage(m) { return (m.status || "new") === "new" || m.status === "in_progress"; }
+
+  function waDigits(phone) {
+    var d = String(phone || "").replace(/\D/g, "");
+    if (d.charAt(0) === "0") d = "233" + d.slice(1);   // local Ghana number
+    return d;
+  }
+
+  function renderInbox() {
     var list = $("inboxList");
-    if (!msgs.length) {
+    var all = state.messages;
+
+    // filter chips with counts
+    var counts = { all: all.length, open: all.filter(isOpenMessage).length };
+    ["replied", "booked", "closed"].forEach(function (k) { counts[k] = all.filter(function (m) { return m.status === k; }).length; });
+    var chips = [["all", "All"], ["open", "Needs a reply"], ["replied", "Replied"], ["booked", "Booked"], ["closed", "Closed"]];
+    $("inboxFilters").innerHTML = chips.map(function (c) {
+      return '<button type="button" class="division-tab' + (state.inboxFilter === c[0] ? " active" : "") + '" data-filter="' + c[0] + '">' +
+        c[1] + ' <span class="division-tab-count">' + counts[c[0]] + "</span></button>";
+    }).join("");
+
+    var q = state.inboxSearch;
+    var msgs = all.filter(function (m) {
+      if (state.inboxFilter === "open" && !isOpenMessage(m)) return false;
+      if (["replied", "booked", "closed"].indexOf(state.inboxFilter) !== -1 && m.status !== state.inboxFilter) return false;
+      if (q) {
+        var hay = [m.name, m.email, m.phone, m.message, m.note].join(" ").toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+
+    if (!all.length) {
       list.innerHTML = '<div class="card"><p class="muted">No messages yet. When someone uses the contact form on your website, it will show up here.</p></div>';
+      return;
+    }
+    if (!msgs.length) {
+      list.innerHTML = '<div class="card"><p class="muted">No messages match this filter.</p></div>';
       return;
     }
     list.innerHTML = "";
@@ -667,59 +909,83 @@
       item.className = "card message-card" + (m.read ? "" : " message-unread");
       var date = m.created_at ? new Date(m.created_at) : null;
       var dateStr = date ? date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) + " · " + date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "";
+      var first = String(m.name || "").trim().split(/\s+/)[0] || "there";
+      var mailto = "mailto:" + encodeURIComponent(m.email || "") + "?subject=" + encodeURIComponent("Re: your message to Kobby") +
+        "&body=" + encodeURIComponent("Hi " + first + ",\n\nThanks for getting in touch.\n\n");
+      var wa = m.phone ? "https://wa.me/" + waDigits(m.phone) + "?text=" + encodeURIComponent("Hi " + first + ", it's Kobby. Thanks for your message about your project.") : "";
+      var status = m.status || "new";
       item.innerHTML =
         '<div class="message-head">' +
           '<div class="message-who">' +
             (m.read ? "" : '<span class="dot-new" title="Unread"></span>') +
-            '<strong>' + escapeHTML(m.name || "Anonymous") + "</strong>" +
-            '<a class="message-email" href="mailto:' + encodeURIComponent(m.email || "") + '?subject=' + encodeURIComponent("Re: your message to Kobby") + '">' + escapeHTML(m.email || "") + "</a>" +
+            "<strong>" + escapeHTML(m.name || "Anonymous") + "</strong>" +
+            '<a class="message-email" href="mailto:' + escapeAttr(encodeURIComponent(m.email || "")) + '">' + escapeHTML(m.email || "") + "</a>" +
+            (m.phone ? '<span class="muted small">' + escapeHTML(m.phone) + "</span>" : "") +
           "</div>" +
-          '<div class="message-actions">' +
-            '<span class="muted small">' + escapeHTML(dateStr) + "</span>" +
-            (m.read ? "" : '<button class="btn btn-ghost btn-sm" data-act="read">Mark read</button>') +
-            '<button class="btn btn-danger btn-sm" data-act="del">Delete</button>' +
-          "</div>" +
+          '<span class="muted small">' + escapeHTML(dateStr) + "</span>" +
         "</div>" +
-        '<p class="message-body">' + escapeHTML(m.message || "").replace(/\n/g, "<br />") + "</p>";
+        '<p class="message-body">' + escapeHTML(m.message || "").replace(/\n/g, "<br />") + "</p>" +
+        '<div class="message-tools">' +
+          '<label class="status-pick"><span class="muted small">Status</span><select data-act="status" class="status-' + status + '">' +
+            Object.keys(STATUS_LABELS).map(function (k) { return '<option value="' + k + '"' + (k === status ? " selected" : "") + ">" + STATUS_LABELS[k] + "</option>"; }).join("") +
+          "</select></label>" +
+          '<a class="btn btn-secondary btn-sm" data-act="reply" href="' + escapeAttr(mailto) + '">Reply by email</a>' +
+          (wa ? '<a class="btn btn-secondary btn-sm" data-act="reply" target="_blank" rel="noopener" href="' + escapeAttr(wa) + '">WhatsApp</a>' : "") +
+          (m.read ? "" : '<button class="btn btn-ghost btn-sm" data-act="read">Mark read</button>') +
+          '<button class="btn btn-danger btn-sm" data-act="del">Delete</button>' +
+        "</div>" +
+        '<label class="field note-field"><span>Private note (only you can see this)</span>' +
+          '<textarea rows="2" maxlength="1000" data-act="note" placeholder="e.g. Wants a logo, budget GHS 1,000, call Friday">' + escapeHTML(m.note || "") + "</textarea></label>";
 
       item.addEventListener("click", function (e) {
         var act = e.target.closest("[data-act]");
         if (!act) return;
         var action = act.getAttribute("data-act");
-        if (action === "read") markMessageRead(m, item);
-        else if (action === "del") deleteMessageRow(m, item);
+        if (action === "read") updateMessage(m, { read: true });
+        else if (action === "del") deleteMessageRow(m);
+        else if (action === "reply" && (m.status || "new") === "new") updateMessage(m, { status: "in_progress" }, true);
+      });
+      item.addEventListener("change", function (e) {
+        var sel = e.target.closest('select[data-act="status"]');
+        if (sel) updateMessage(m, { status: sel.value });
+      });
+      var note = item.querySelector('textarea[data-act="note"]');
+      note.addEventListener("blur", function () {
+        var v = note.value.trim();
+        if (v === (m.note || "")) return;
+        updateMessage(m, { note: v || null }, true);
       });
       list.appendChild(item);
     });
   }
 
-  function markMessageRead(m, item) {
-    window.sb.from("messages")
-      .update({ read: true })
-      .eq("id", m.id)
+  // quiet = don't redraw the list (used while typing a note or opening a reply)
+  function updateMessage(m, patch, quiet) {
+    patch = Object.assign({}, patch);
+    if (patch.status && patch.status !== "new") patch.read = true;
+    if (patch.status === "replied" && !m.replied_at) patch.replied_at = new Date().toISOString();
+    return window.sb.from("messages").update(patch).eq("id", m.id)
       .then(function (res) {
         if (res.error) throw res.error;
-        m.read = true;
-        item.classList.remove("message-unread");
-        var btn = item.querySelector('[data-act="read"]');
-        if (btn) btn.remove();
-        var dot = item.querySelector(".dot-new");
-        if (dot) dot.remove();
+        Object.assign(m, patch);
+        if (patch.status) logActivity("Message marked " + STATUS_LABELS[patch.status].toLowerCase(), m.name || m.email);
         loadInboxCount();
+        if (!quiet) renderInbox();
       })
       .catch(function (err) { alert("Could not update: " + err.message); });
   }
 
-  function deleteMessageRow(m, item) {
+  function deleteMessageRow(m) {
     if (!confirm("Delete this message from " + (m.name || m.email || "anonymous") + "?")) return;
     window.sb.from("messages")
       .delete()
       .eq("id", m.id)
       .then(function (res) {
         if (res.error) throw res.error;
-        item.remove();
+        state.messages = state.messages.filter(function (x) { return x.id !== m.id; });
+        logActivity("Deleted message", m.name || m.email);
         loadInboxCount();
-        if (!$("inboxList").children.length) renderInbox([]);
+        renderInbox();
       })
       .catch(function (err) { alert("Could not delete: " + err.message); });
   }
@@ -772,28 +1038,37 @@
   function exportBackup() {
     var status = $("exportStatus");
     status.textContent = "Preparing backup…";
-    window.sb.from("projects")
-      .select("*, project_images(*)")
-      .order("sort_order", { ascending: true })
-      .then(function (res) {
-        if (res.error) throw res.error;
-        var data = {
-          exported_at: new Date().toISOString(),
-          project_count: (res.data || []).length,
-          projects: res.data || []
-        };
-        var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-        var a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "portfolio-backup-" + new Date().toISOString().slice(0, 10) + ".json";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        status.textContent = "Backup downloaded ✓";
-      })
-      .catch(function (err) {
-        status.textContent = "Backup failed: " + err.message;
-      });
+    var grab = function (table, sel, order) {
+      var q = window.sb.from(table).select(sel || "*");
+      if (order) q = q.order(order, { ascending: true });
+      return q.then(function (res) { if (res.error) throw new Error(table + ": " + res.error.message); return res.data || []; });
+    };
+    Promise.all([
+      grab("projects", "*, project_images(*)", "sort_order"),
+      grab("messages", "*", "created_at"),
+      grab("testimonials", "*", "sort_order"),
+      grab("clients", "*", "sort_order"),
+      grab("packages", "*", "sort_order"),
+      grab("site_settings"),
+      grab("blog_posts", "*", "publish_on")
+    ]).then(function (r) {
+      var data = {
+        exported_at: new Date().toISOString(),
+        project_count: r[0].length,
+        projects: r[0], messages: r[1], testimonials: r[2], clients: r[3], packages: r[4], site_settings: r[5], blog_posts: r[6]
+      };
+      var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "portfolio-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      status.textContent = "Backup downloaded ✓";
+      logActivity("Downloaded a backup", "");
+    }).catch(function (err) {
+      status.textContent = "Backup failed: " + err.message;
+    });
   }
 
   function signOutAll() {
@@ -825,6 +1100,16 @@
   }
 
   function escapeAttr(str) { return escapeHTML(str); }
+
+  /* ============================================================
+     SHARED WITH js panels (admin/panels.js)
+     ============================================================ */
+  window.Admin = {
+    $: $, state: state, esc: escapeHTML, attr: escapeAttr, slugify: slugify, log: logActivity,
+    niceTime: niceTime, loadProjects: loadProjects, loadMessages: loadInbox, isScheduled: isScheduled,
+    publicUrl: publicUrl, optimiseImage: optimiseImage, toLocalInput: toLocalInput
+  };
+  window.AdminPanels = window.AdminPanels || {};
 
   /* ============================================================
      BOOT

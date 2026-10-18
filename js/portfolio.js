@@ -37,20 +37,27 @@
   // Fetch published projects from Supabase, with images ordered.
   // Rejects if the database can't be reached — the site never shows
   // placeholder projects, so callers show LOAD_ERROR_TEXT instead.
-  function fetchProjects() {
+  function fetchProjects(opts) {
     if (!(window.sb && window.SUPABASE_CONFIGURED)) {
       return Promise.reject(new Error("Supabase client is not available"));
     }
-    return window.sb
-      .from("projects")
-      .select("*, project_images(*)")
-      .eq("published", true)
+    var preview = Boolean(opts && opts.preview);   // admin only: also shows drafts and scheduled projects
+    var q = window.sb.from("projects").select("*, project_images(*)");
+    if (!preview) q = q.eq("published", true);
+    return q
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
       .order("image_order", { referencedTable: "project_images", ascending: true })
       .then(function (res) {
         if (res.error) throw res.error;
-        return normalizeAll(res.data || []);
+        var rows = res.data || [];
+        if (!preview) {
+          // Scheduled projects stay hidden until their date (the database enforces this
+          // for visitors too; this keeps the signed-in admin's view identical).
+          var now = Date.now();
+          rows = rows.filter(function (r) { return !r.publish_at || new Date(r.publish_at).getTime() <= now; });
+        }
+        return normalizeAll(rows);
       })
       .catch(function (err) {
         console.error("Could not load projects:", err);
@@ -63,7 +70,9 @@
     var images = (p.project_images || p.images || [])
       .slice()
       .sort(function (a, b) { return (a.image_order || 0) - (b.image_order || 0); })
-      .map(function (im) { return im.image_url; });
+      ;
+    var alts = images.map(function (im) { return (im.alt_text || "").trim(); });
+    images = images.map(function (im) { return im.image_url; });
     return {
       id: p.id,
       title: p.title || "Untitled",
@@ -79,6 +88,7 @@
       video_url: p.video_url || "",
       featured: Boolean(p.featured),
       images: images,
+      alts: alts,
       cover: images[0] || ""
     };
   }
@@ -91,6 +101,11 @@
      SHARED RENDERING
      ============================================================ */
 
+  // Alt text you wrote in the admin, or a sensible fallback.
+  function altFor(p, i, fallback) {
+    return (p.alts && p.alts[i]) || fallback;
+  }
+
   function el(html) {
     var div = document.createElement("div");
     div.innerHTML = html.trim();
@@ -101,7 +116,7 @@
     return (
       '<a class="project-card ' + (extraClass || "") + '" href="project.html?slug=' + encodeURIComponent(p.slug) + '">' +
         '<div class="card-media">' +
-          '<img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(p.title) + '" loading="lazy" />' +
+          '<img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(altFor(p, 0, p.title)) + '" loading="lazy" />' +
           (p.video_url ? '<span class="card-badge">▶ Video</span>' : "") +
         "</div>" +
         '<div class="card-info">' +
@@ -139,7 +154,7 @@
       if (featuredWrap) {
         featuredWrap.innerHTML = (
           '<a class="featured-media" href="project.html?slug=' + encodeURIComponent(featured.slug) + '" data-reveal>' +
-            '<img src="' + escapeAttr(featured.cover) + '" alt="' + escapeAttr(featured.title) + '" />' +
+            '<img src="' + escapeAttr(featured.cover) + '" alt="' + escapeAttr(altFor(featured, 0, featured.title)) + '" />' +
           "</a>" +
           '<div class="featured-meta" data-reveal>' +
             '<h3 class="featured-title"><a href="project.html?slug=' + encodeURIComponent(featured.slug) + '">' + escapeHTML(featured.title) + "</a></h3>" +
@@ -338,7 +353,9 @@
       return;
     }
 
-    fetchProjects().then(function (projects) {
+    // ?preview=1 lets the signed-in admin see a draft or scheduled project before it goes public.
+    var isPreview = new URLSearchParams(location.search).get("preview") === "1";
+    fetchProjects({ preview: isPreview }).then(function (projects) {
       var idx = -1;
       var p = null;
       for (var k = 0; k < projects.length; k++) {
@@ -355,6 +372,15 @@
       }
 
       document.title = p.title + " — Kobby";
+      if (isPreview) {
+        var robots = document.createElement("meta");
+        robots.name = "robots"; robots.content = "noindex, nofollow";
+        document.head.appendChild(robots);
+        var bar = document.createElement("div");
+        bar.className = "preview-banner";
+        bar.textContent = "Preview — only you can see this page while you are signed in to the admin.";
+        document.body.appendChild(bar);
+      }
       updateProjectSEO(p);
 
       // Final design: first images, large. Gallery: remaining images.
@@ -393,7 +419,7 @@
           "</div>" +
           jumpHTML +
         "</div>" +
-        '<div class="case-hero-media" data-reveal><div class="frame"><img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(p.title) + '" /></div></div>' +
+        '<div class="case-hero-media" data-reveal><div class="frame"><img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(altFor(p, 0, p.title)) + '" /></div></div>' +
         '<div class="case-body">' +
           (p.video_url ? '<div class="case-section" id="cs-video" data-reveal>' + '<h2 class="case-section-label">Motion</h2>' + videoEmbedHTML(p.video_url) + "</div>" : "") +
           sectionHTML("Client Brief", p.brief, "cs-brief") +
@@ -405,7 +431,7 @@
                 '<h2 class="case-section-label">Final Design</h2>' +
                 '<div class="case-gallery" style="padding:0;">' +
                   finalImages.map(function (src, i) {
-                    return '<div class="frame' + (i % 2 === 1 ? " wide" : "") + '"><img src="' + escapeAttr(src) + '" alt="' + escapeAttr(p.title) + ' — final design ' + (i + 1) + '" loading="lazy" /></div>';
+                    return '<div class="frame' + (i % 2 === 1 ? " wide" : "") + '"><img src="' + escapeAttr(src) + '" alt="' + escapeAttr(altFor(p, i, p.title + " — final design " + (i + 1))) + '" loading="lazy" /></div>';
                   }).join("") +
                 "</div>" +
               "</div>"
@@ -416,7 +442,7 @@
                 '<h2 class="case-section-label">Project Gallery</h2>' +
                 '<div class="case-gallery" style="padding:0;">' +
                   galleryImages.map(function (src, i) {
-                    return '<div class="frame"><img src="' + escapeAttr(src) + '" alt="' + escapeAttr(p.title) + ' — gallery image ' + (i + 1) + '" loading="lazy" /></div>';
+                    return '<div class="frame"><img src="' + escapeAttr(src) + '" alt="' + escapeAttr(altFor(p, i + 2, p.title + " — gallery image " + (i + 1))) + '" loading="lazy" /></div>';
                   }).join("") +
                 "</div>" +
               "</div>"
@@ -583,7 +609,7 @@
       (p.video_url ? '<div class="qv-video">' + videoEmbedHTML(p.video_url) + "</div>" : "") +
       '<div class="qv-images">' +
         p.images.map(function (src, n) {
-          return '<img src="' + escapeAttr(src) + '" alt="' + escapeAttr(p.title) + (p.images.length > 1 ? " — image " + (n + 1) : "") + '"' + (n ? ' loading="lazy"' : "") + " />";
+          return '<img src="' + escapeAttr(src) + '" alt="' + escapeAttr(altFor(p, n, p.title + (p.images.length > 1 ? " — image " + (n + 1) : ""))) + '"' + (n ? ' loading="lazy"' : "") + " />";
         }).join("") +
       "</div>" +
       (text ? '<div class="qv-text">' + text + "</div>" : "") +

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="admin.css?v=2" />
+  <link rel="stylesheet" href="admin.css?v=3" />
 </head>
 <body data-admin="dashboard">
 
@@ -37,13 +37,40 @@
 
     <!-- ============ TABS ============ -->
     <nav class="admin-tabs" aria-label="Admin sections">
-      <button class="tab-btn active" data-tab="projects" type="button">Projects</button>
+      <button class="tab-btn active" data-tab="overview" type="button">Overview</button>
+      <button class="tab-btn" data-tab="projects" type="button">Projects</button>
       <button class="tab-btn" data-tab="inbox" type="button">Inbox <span class="count-badge" id="inboxCount" hidden>0</span></button>
+      <button class="tab-btn" data-tab="site" type="button">Site</button>
+      <button class="tab-btn" data-tab="stats" type="button">Stats</button>
+      <button class="tab-btn" data-tab="blog" type="button">Blog</button>
       <button class="tab-btn" data-tab="account" type="button">Account</button>
     </nav>
 
+    <!-- ============ OVERVIEW TAB ============ -->
+    <section id="overviewTab">
+      <div class="list-head">
+        <h2>Overview</h2>
+        <p class="list-hint" id="ovHello">Loading…</p>
+      </div>
+      <div class="stat-tiles" id="ovTiles"></div>
+      <div class="ov-grid">
+        <div class="card">
+          <h3>Needs your attention</h3>
+          <ul class="attention" id="ovAttention"><li class="muted">Checking…</li></ul>
+        </div>
+        <div class="card">
+          <h3>Latest messages</h3>
+          <div id="ovMessages"><p class="muted small">Loading…</p></div>
+        </div>
+        <div class="card">
+          <h3>Recent activity</h3>
+          <ul class="activity" id="ovActivity"><li class="muted">Loading…</li></ul>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ PROJECTS TAB ============ -->
-    <section id="projectsTab">
+    <section id="projectsTab" hidden>
 
       <!-- Project list -->
       <section id="listView">
@@ -63,6 +90,8 @@
         <div class="editor-head">
           <button class="btn btn-ghost" id="backToList">← Back to list</button>
           <h2 id="editorTitle">New Project</h2>
+          <button class="btn btn-secondary btn-sm" id="previewBtn" type="button" hidden>Preview</button>
+          <button class="btn btn-ghost btn-sm" id="copyLinkBtn" type="button" hidden>Copy public link</button>
         </div>
 
         <div class="editor-grid">
@@ -104,6 +133,20 @@
                 <input type="text" id="fYear" placeholder="e.g. 2026" maxlength="10" />
               </label>
             </div>
+            <div class="template-bar">
+              <label class="field">
+                <span>Need a head start? Add starter text for…</span>
+                <select id="templateSelect">
+                  <option value="">Choose a project type</option>
+                  <option value="brand">Logo &amp; brand identity</option>
+                  <option value="flyer">Flyer or poster</option>
+                  <option value="video">Video edit</option>
+                  <option value="social">Social media set</option>
+                </select>
+              </label>
+              <button class="btn btn-ghost btn-sm" id="templateBtn" type="button">Add starter text</button>
+            </div>
+            <p class="muted small" id="templateStatus"></p>
             <label class="field">
               <span>Client Brief</span>
               <textarea id="fBrief" rows="3" placeholder="What did the client want?"></textarea>
@@ -128,6 +171,13 @@
               <span>Video URL — YouTube, Vimeo or direct video file (optional, for Video &amp; Motion work)</span>
               <input type="text" id="fVideo" placeholder="https://www.youtube.com/watch?v=… or https://…/video.mp4" />
             </label>
+            <label class="field">
+              <span>Go live on a date (optional) — tick “Published” below, and it appears on the site at this time</span>
+              <span class="inline-row">
+                <input type="datetime-local" id="fPublishAt" />
+                <button class="btn btn-ghost btn-sm" id="clearScheduleBtn" type="button">Clear</button>
+              </span>
+            </label>
             <div class="field-checks">
               <label class="check">
                 <input type="checkbox" id="fFeatured" />
@@ -149,6 +199,10 @@
           <aside class="card images-card">
             <h3>Project Images</h3>
             <p class="muted small" id="imagesHint">Upload the cover first — the first image is used as the project cover.</p>
+            <label class="check" style="margin-bottom:0.7rem;">
+              <input type="checkbox" id="optimiseImages" checked />
+              <span>Shrink large photos automatically (faster site)</span>
+            </label>
             <input type="file" id="imageInput" accept="image/*" multiple hidden />
             <button class="btn btn-secondary btn-block" id="addImagesBtn" type="button" disabled>Upload images</button>
             <input type="file" id="videoInput" accept="video/*" hidden />
@@ -166,10 +220,137 @@
     <section id="inboxTab" hidden>
       <div class="list-head">
         <h2>Inbox</h2>
-        <p class="list-hint">Messages sent through the contact form on your website.</p>
+        <p class="list-hint">Messages sent through the contact form. Set a status as you go, add a private note, and reply by email or WhatsApp.</p>
+      </div>
+      <div class="inbox-bar">
+        <input type="search" id="inboxSearch" placeholder="Search name, email, message or note…" aria-label="Search messages" />
+        <div class="division-tabs" id="inboxFilters"></div>
       </div>
       <div class="inbox-list" id="inboxList">
         <p class="muted">Loading messages…</p>
+      </div>
+    </section>
+
+    <!-- ============ SITE TAB (settings + content shown on the site) ============ -->
+    <section id="siteTab" hidden>
+      <div class="list-head">
+        <h2>Site</h2>
+        <p class="list-hint">Things you can change here without touching any code. Changes show on the website within a few seconds.</p>
+      </div>
+
+      <div class="card" id="settingsCard">
+        <h3>Availability &amp; WhatsApp</h3>
+        <form id="settingsForm">
+          <label class="check" style="margin-bottom:1rem;">
+            <input type="checkbox" id="sAvailable" />
+            <span>I'm available for new projects (untick to show “Fully booked”)</span>
+          </label>
+          <div class="field-row">
+            <label class="field">
+              <span>WhatsApp number (with country code, digits only)</span>
+              <input type="text" id="sWhatsapp" inputmode="numeric" placeholder="233545414923" />
+            </label>
+            <label class="field">
+              <span>First message visitors send you</span>
+              <input type="text" id="sWaMessage" maxlength="300" />
+            </label>
+          </div>
+          <div class="alert alert-error" id="settingsError" hidden></div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="settingsSave">Save settings</button>
+            <span class="muted" id="settingsStatus"></span>
+          </div>
+        </form>
+      </div>
+
+      <div class="card manager" id="mgrTestimonials"></div>
+      <div class="card manager" id="mgrClients"></div>
+      <div class="card manager" id="mgrPackages"></div>
+    </section>
+
+    <!-- ============ STATS TAB ============ -->
+    <section id="statsTab" hidden>
+      <div class="list-head">
+        <h2>Stats</h2>
+        <p class="list-hint">Simple, private visitor numbers. No cookies, no IP addresses and nothing that follows a person around. Your own visits from this browser are not counted.</p>
+      </div>
+      <div class="division-tabs" id="statsRange">
+        <button type="button" class="division-tab" data-days="7">Last 7 days</button>
+        <button type="button" class="division-tab active" data-days="30">Last 30 days</button>
+        <button type="button" class="division-tab" data-days="90">Last 90 days</button>
+      </div>
+      <div class="stat-tiles" id="stTiles"></div>
+      <div class="card"><h3>Visits per day</h3><div class="bars" id="stBars"></div></div>
+      <div class="ov-grid">
+        <div class="card"><h3>Most viewed pages</h3><ol class="rank" id="stPages"></ol></div>
+        <div class="card"><h3>Most viewed projects</h3><ol class="rank" id="stProjects"></ol></div>
+        <div class="card"><h3>Where visitors come from</h3><ol class="rank" id="stRefs"></ol></div>
+        <div class="card"><h3>Phone, tablet or computer</h3><ol class="rank" id="stDevices"></ol></div>
+      </div>
+      <p class="muted small" style="margin-top:1rem;">A “visit” is the first page someone opens in a session. A “page view” is every page they open.</p>
+    </section>
+
+    <!-- ============ BLOG TAB ============ -->
+    <section id="blogTab" hidden>
+      <div id="blogListView">
+        <div class="list-head">
+          <h2>Blog</h2>
+          <p class="list-hint">Posts you write here are added to the blog automatically (usually within the hour) once they're set to “Ready” and their date arrives. Posts written earlier in the code are listed too, but only posts made here can be edited here.</p>
+        </div>
+        <button class="btn btn-primary" id="newPostBtn" type="button" style="margin-bottom:1.2rem;">+ New post</button>
+        <div class="project-table" id="blogList"><p class="muted">Loading…</p></div>
+      </div>
+      <div id="blogEditView" hidden>
+        <div class="editor-head">
+          <button class="btn btn-ghost" id="blogBack" type="button">← Back to posts</button>
+          <h2 id="blogEditTitle">New post</h2>
+        </div>
+        <form id="blogForm" class="card">
+          <div class="field-row">
+            <label class="field"><span>Title *</span><input type="text" id="bTitle" required maxlength="200" /></label>
+            <label class="field"><span>Web address (slug)</span><input type="text" id="bSlug" maxlength="100" /></label>
+          </div>
+          <div class="field-row field-row-3">
+            <label class="field"><span>Category</span><input type="text" id="bCategory" maxlength="60" value="Design" /></label>
+            <label class="field"><span>Publish date</span><input type="date" id="bDate" required /></label>
+            <label class="field"><span>Status</span>
+              <select id="bStatus"><option value="draft">Draft (not published)</option><option value="ready">Ready (publishes on its date)</option></select>
+            </label>
+          </div>
+          <label class="field">
+            <span>Short description for Google (about 150 characters) <em id="bDescCount" class="muted"></em></span>
+            <textarea id="bDescription" rows="2" maxlength="300" required></textarea>
+          </label>
+          <label class="field">
+            <span>Post (Markdown)</span>
+            <textarea id="bBody" rows="22" class="mono" placeholder="Write the post here. Use ## for headings."></textarea>
+          </label>
+          <details class="cheatsheet">
+            <summary>Formatting help</summary>
+            <pre>## A heading
+### A smaller heading
+
+Normal paragraph text. **Bold**, *italic*, and a [link](https://example.com).
+
+- A bullet
+- Another bullet
+
+1. A numbered step
+2. Another step
+
+| Column | Column |
+|---|---|
+| Cell | Cell |</pre>
+          </details>
+          <div class="alert alert-error" id="blogError" hidden></div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="blogSave">Save post</button>
+            <button type="button" class="btn btn-secondary" id="blogPublishNow" hidden>Publish now</button>
+            <button type="button" class="btn btn-ghost" id="blogPause" hidden>Pause (back to draft)</button>
+            <button type="button" class="btn btn-danger" id="blogDelete" hidden>Delete</button>
+            <span class="muted" id="blogStatusMsg"></span>
+          </div>
+        </form>
       </div>
     </section>
 
@@ -213,15 +394,22 @@
           </form>
         </div>
 
+        <!-- Activity -->
+        <div class="card" style="grid-column:1 / -1;">
+          <h3>Activity log</h3>
+          <p class="muted small">The last 50 things you changed.</p>
+          <ul class="activity" id="activityFull"><li class="muted">Loading…</li></ul>
+        </div>
+
         <!-- Backup -->
         <div class="card">
           <h3>Backup</h3>
           <p class="muted small">
-            Download every project and image record as a JSON file — a safety copy
+            Download your projects, messages, testimonials, clients, packages, settings and blog posts as a JSON file — a safety copy
             of all your content. Images live in Supabase Storage; the backup keeps
             their URLs.
           </p>
-          <button class="btn btn-secondary" id="exportBtn" type="button">Export projects (JSON)</button>
+          <button class="btn btn-secondary" id="exportBtn" type="button">Export everything (JSON)</button>
           <p class="upload-status" id="exportStatus"></p>
         </div>
 
@@ -232,6 +420,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
   <script src="../js/config.js" defer></script>
-  <script src="admin.js?v=5" defer></script>
+  <script src="admin.js?v=6" defer></script>
+  <script src="panels.js?v=1" defer></script>
 </body>
 </html>

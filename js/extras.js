@@ -1,6 +1,8 @@
 /* ============================================================
    KOBBY — Portfolio
-   extras.js — renders testimonials and pricing packages from js/content.js
+   extras.js — renders testimonials, client logos and pricing packages.
+   The data comes from the admin (js/live.js loads it); js/content.js is
+   only a fallback used when the database can't be reached.
    ============================================================ */
 (function () {
   "use strict";
@@ -11,36 +13,36 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    // ---- Testimonials (home page) ----
+  function render() {
+    // ---- Testimonials + clients (home page) ----
     var tSection = document.getElementById("testimonials");
     var quotes = (window.TESTIMONIALS || []).filter(function (t) { return t && t.quote && t.name; });
     var clients = (window.CLIENTS || []).filter(function (c) { return c && c.name; });
-    if (tSection && clients.length) {
+    if (tSection) {
       var row = document.getElementById("clients-row");
-      row.innerHTML = '<span class="clients-label">Worked with</span>' + clients.map(function (c) {
-        return c.logo
-          ? '<img class="client-logo" src="' + esc(c.logo) + '" alt="' + esc(c.name) + '" loading="lazy" />'
-          : '<span class="client-name">' + esc(c.name) + "</span>";
-      }).join("");
-      row.hidden = false;
-      tSection.hidden = false;
-      if (!quotes.length) document.getElementById("testimonials-label").textContent = "Clients";
-    }
-    if (tSection && quotes.length) {
-      document.getElementById("testimonials-grid").innerHTML = quotes.map(function (t) {
+      var grid = document.getElementById("testimonials-grid");
+      if (clients.length) {
+        row.innerHTML = '<span class="clients-label">Worked with</span>' + clients.map(function (c) {
+          return c.logo
+            ? '<img class="client-logo" src="' + esc(c.logo) + '" alt="' + esc(c.name) + '" loading="lazy" />'
+            : '<span class="client-name">' + esc(c.name) + "</span>";
+        }).join("");
+      }
+      row.hidden = !clients.length;
+      document.getElementById("testimonials-label").textContent = quotes.length ? "Kind words" : "Clients";
+      grid.innerHTML = quotes.map(function (t) {
         return '<blockquote class="testimonial" data-reveal>' +
           "<p>“" + esc(t.quote) + "”</p>" +
           "<footer><strong>" + esc(t.name) + "</strong>" + (t.role ? " · " + esc(t.role) : "") + "</footer>" +
         "</blockquote>";
       }).join("");
-      tSection.hidden = false;
+      tSection.hidden = !(quotes.length || clients.length);
     }
 
     // ---- Pricing packages (services page) ----
     var pWrap = document.getElementById("pricing-packages");
     var packs = (window.PRICING || []).filter(function (p) { return p && p.name && p.from; });
-    if (pWrap && packs.length) {
+    if (pWrap) {
       pWrap.innerHTML = packs.map(function (p) {
         return '<div class="package" data-reveal>' +
           '<h3 class="package-name">' + esc(p.name) + "</h3>" +
@@ -48,9 +50,12 @@
           (p.includes && p.includes.length ? "<ul>" + p.includes.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("") + "</ul>" : "") +
         "</div>";
       }).join("");
-      pWrap.hidden = false;
+      pWrap.hidden = !packs.length;
     }
 
     document.dispatchEvent(new CustomEvent("content:updated"));
-  });
+  }
+
+  window.KobbyExtras = { render: render };
+  document.addEventListener("DOMContentLoaded", render);
 })();

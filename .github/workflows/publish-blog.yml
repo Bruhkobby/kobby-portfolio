@@ -1,13 +1,13 @@
 name: Publish blog
 
-# Blog posts live in blog-src/posts/ and each one has a date in its file name
-# (YYYY-MM-DD-title.md). Every day this job builds the blog and publishes any
-# post whose date has arrived. Posts dated in the future stay hidden until
-# their day, so you can write them ahead of time.
+# Blog posts live in blog-src/posts/ (written in the code) or are written in the
+# admin's Blog tab. Every hour this job copies the admin's posts that are ready,
+# builds the blog and publishes any post whose date has arrived. Posts dated in
+# the future stay hidden until their day, so you can write them ahead of time.
 
 on:
   schedule:
-    - cron: "5 5 * * *"        # every day at 05:05 UTC
+    - cron: "17 * * * *"       # every hour, at 17 minutes past
   push:
     branches: [main]
     paths: ["blog-src/**"]     # also run when a post is added or edited
@@ -39,6 +39,9 @@ jobs:
       - name: Install Markdown
         run: pip install markdown==3.10.3
 
+      - name: Copy posts written in the admin
+        run: python blog-src/fetch_admin_posts.py
+
       - name: Build the blog
         env:
           AS_OF: ${{ inputs.as_of }}
@@ -56,7 +59,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A blog.html blog sitemap.xml
+          git add -A blog.html blog sitemap.xml blog-src/posts-admin
           if git diff --cached --quiet; then
             echo "Nothing new to publish."
             echo "changed=false" >> "$GITHUB_OUTPUT"

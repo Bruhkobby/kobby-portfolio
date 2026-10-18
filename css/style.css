@@ -1337,3 +1337,12 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
   height: 100%;
   border: 0;
 }
+
+/* Admin preview banner (project.html?preview=1) */
+.preview-banner {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 260;
+  background: var(--accent); color: #fff; text-align: center;
+  font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 0.7rem 1rem;
+}
+em.optional { font-style: normal; text-transform: none; letter-spacing: 0; opacity: 0.6; }
