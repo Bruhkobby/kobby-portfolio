@@ -74,7 +74,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=6" />
+  <link rel="stylesheet" href="css/style.css?v=8" />
   <link rel="stylesheet" href="css/responsive.css" />
 </head>
 <body class="page" data-page="index">
@@ -188,6 +188,16 @@
       </div>
     </section>
 
+    <!-- ============ TESTIMONIALS + CLIENTS (shown only when js/content.js has real entries) ============ -->
+    <section class="section testimonials" id="testimonials" hidden>
+      <div class="section-head" data-reveal>
+        <span class="section-label" id="testimonials-label">Kind words</span>
+        <span class="section-rule"></span>
+      </div>
+      <div id="testimonials-grid" class="testimonials-grid"></div>
+      <div id="clients-row" class="clients-row" hidden></div>
+    </section>
+
     <!-- ============ STATEMENT / ABOUT TEASER ============ -->
     <section class="section statement">
       <!-- EDIT ME: your creative philosophy in one or two sentences -->
@@ -217,6 +227,7 @@
         <h3>Contact</h3>
         <a href="mailto:bruhkobby707@gmail.com">bruhkobby707@gmail.com</a>
         <a href="tel:+233545414923">054 541 4923</a>
+        <a href="https://wa.me/233545414923?text=Hi%20Kobby%2C%20I%20found%20your%20portfolio%20and%20I%27d%20like%20to%20talk%20about%20a%20project." data-whatsapp target="_blank" rel="noopener">WhatsApp</a>
       </div>
       <div class="footer-col">
         <h3>Social</h3>
@@ -247,8 +258,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
   <script src="js/config.js" defer></script>
-  <script src="js/main.js?v=4" defer></script>
+  <script src="js/main.js?v=5" defer></script>
   <script src="js/animations.js?v=2" defer></script>
-  <script src="js/portfolio.js?v=4" defer></script>
+  <script src="js/portfolio.js?v=6" defer></script>
+  <script src="js/content.js" defer></script>
+  <script src="js/extras.js" defer></script>
 </body>
 </html>

@@ -79,6 +79,34 @@
     });
   }
 
+  /* ---------- Site settings: change these in one place ---------- */
+  var SITE = {
+    available: true,            // true = "Available for new projects", false = "Fully booked"
+    whatsapp: "233545414923",   // number with country code, no + or spaces
+    whatsappMessage: "Hi Kobby, I found your portfolio and I'd like to talk about a project."
+  };
+  var waLink = "https://wa.me/" + SITE.whatsapp + "?text=" + encodeURIComponent(SITE.whatsappMessage);
+
+  document.querySelectorAll("[data-whatsapp]").forEach(function (a) { a.href = waLink; });
+
+  document.querySelectorAll("[data-availability]").forEach(function (el) {
+    el.classList.toggle("is-busy", !SITE.available);
+    el.innerHTML = '<span class="availability-dot" aria-hidden="true"></span>' +
+      (SITE.available ? "Available for new projects" : "Fully booked right now — message me to join the waitlist");
+  });
+
+  // Floating WhatsApp button (not on the admin pages)
+  if (!document.body.hasAttribute("data-admin") && !document.querySelector(".whatsapp-fab")) {
+    var fab = document.createElement("a");
+    fab.className = "whatsapp-fab";
+    fab.href = waLink;
+    fab.target = "_blank";
+    fab.rel = "noopener";
+    fab.setAttribute("aria-label", "Chat with Kobby on WhatsApp");
+    fab.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.2 3.6c-.4.3-.8.1-.8-.4V16.2A2.5 2.5 0 0 1 4 14z" stroke-linejoin="round"/></svg><span>Chat on WhatsApp</span>';
+    document.body.appendChild(fab);
+  }
+
   // Fade out before navigating to an internal page.
   document.addEventListener("click", function (e) {
     var link = e.target.closest("a");

@@ -94,6 +94,7 @@
 
   .related-grid { grid-template-columns: 1fr; }
   .division-count { display: none; }
+  .case-jump .copy-link { margin-left: 0; }
 
   /* Blog list stacks */
   .post-row { grid-template-columns: 1fr; gap: 0.6rem; }
@@ -111,5 +112,7 @@
   .card-info { flex-direction: column; gap: 0.3rem; }
   .card-meta { text-align: left; }
   .page-hero { padding-top: 8rem; }
+  .whatsapp-fab { padding: 0.95rem; }
+  .whatsapp-fab span { display: none; }
   .case-hero { padding-top: 8rem; }
 }

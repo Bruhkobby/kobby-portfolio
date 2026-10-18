@@ -30,6 +30,8 @@
      DATA LAYER
      ============================================================ */
 
+  var quickList = []; // projects currently on screen, in order (used by the quick-view popup)
+
   var LOAD_ERROR_TEXT = "Projects couldn't be loaded right now. Please refresh in a moment.";
 
   // Fetch published projects from Supabase, with images ordered.
@@ -147,6 +149,7 @@
       }
 
       var rest = projects.filter(function (p) { return p !== featured; }).slice(0, 3);
+      quickList = [featured].concat(rest);
       if (selectedWrap) {
         selectedWrap.innerHTML = rest.map(function (p, i) { return cardHTML(p, "preview-" + i); }).join("");
       }
@@ -197,8 +200,10 @@
       var shown = active === "all" ? groups : groups.filter(function (g) { return g.division.id === active; });
       document.getElementById("emptyNote").hidden = shown.length > 0;
       holder.innerHTML = "";
+      quickList = [];
       var n = 0;
       shown.forEach(function (g) {
+        quickList = quickList.concat(g.projects);
         var section = document.createElement("section");
         section.className = "division";
         section.id = "division-" + g.division.id;
@@ -258,10 +263,10 @@
      CASE STUDY PAGE
      ============================================================ */
 
-  function sectionHTML(label, text) {
+  function sectionHTML(label, text, id) {
     if (!text) return "";
     return (
-      '<div class="case-section" data-reveal>' +
+      '<div class="case-section"' + (id ? ' id="' + id + '"' : "") + ' data-reveal>' +
         '<h2 class="case-section-label">' + label + "</h2>" +
         '<p class="case-section-text">' + escapeHTML(text) + "</p>" +
       "</div>"
@@ -356,6 +361,26 @@
       var finalImages = p.images.slice(0, 2);
       var galleryImages = p.images.slice(2);
 
+      // Reading time + jump links
+      var words = [p.brief, p.objective, p.creative_direction, p.process, p.result].join(" ").split(/\s+/).filter(Boolean).length;
+      var minutes = Math.max(1, Math.ceil(words / 200));
+      var jump = [];
+      if (p.video_url) jump.push(["cs-video", "Video"]);
+      if (p.brief) jump.push(["cs-brief", "Brief"]);
+      if (p.objective) jump.push(["cs-objective", "Objective"]);
+      if (p.creative_direction) jump.push(["cs-direction", "Direction"]);
+      if (p.process) jump.push(["cs-process", "Process"]);
+      if (finalImages.length) jump.push(["cs-final", "Final design"]);
+      if (p.result) jump.push(["cs-result", "Result"]);
+      if (galleryImages.length) jump.push(["cs-gallery", "Gallery"]);
+      var jumpHTML =
+        '<div class="case-jump" data-reveal>' +
+          (jump.length >= 3
+            ? jump.map(function (j) { return '<a class="filter-btn" href="#' + j[0] + '">' + j[1] + "</a>"; }).join("")
+            : "") +
+          '<button class="filter-btn copy-link" type="button">Copy link</button>' +
+        "</div>";
+
       var html =
         '<div class="case-hero">' +
           '<a class="case-back" href="portfolio.html">← Portfolio</a>' +
@@ -364,17 +389,19 @@
             '<div class="case-meta-item"><span class="case-meta-label">Category</span><span class="case-meta-value">' + escapeHTML(p.category) + "</span></div>" +
             (p.client ? '<div class="case-meta-item"><span class="case-meta-label">Client</span><span class="case-meta-value">' + escapeHTML(p.client) + "</span></div>" : "") +
             (p.year ? '<div class="case-meta-item"><span class="case-meta-label">Year</span><span class="case-meta-value">' + escapeHTML(p.year) + "</span></div>" : "") +
+            (words ? '<div class="case-meta-item"><span class="case-meta-label">Reading time</span><span class="case-meta-value">' + minutes + " min</span></div>" : "") +
           "</div>" +
+          jumpHTML +
         "</div>" +
         '<div class="case-hero-media" data-reveal><div class="frame"><img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(p.title) + '" /></div></div>' +
         '<div class="case-body">' +
-          (p.video_url ? '<div class="case-section" data-reveal>' + '<h2 class="case-section-label">Motion</h2>' + videoEmbedHTML(p.video_url) + "</div>" : "") +
-          sectionHTML("Client Brief", p.brief) +
-          sectionHTML("Objective", p.objective) +
-          sectionHTML("Creative Direction", p.creative_direction) +
-          sectionHTML("Design Process", p.process) +
+          (p.video_url ? '<div class="case-section" id="cs-video" data-reveal>' + '<h2 class="case-section-label">Motion</h2>' + videoEmbedHTML(p.video_url) + "</div>" : "") +
+          sectionHTML("Client Brief", p.brief, "cs-brief") +
+          sectionHTML("Objective", p.objective, "cs-objective") +
+          sectionHTML("Creative Direction", p.creative_direction, "cs-direction") +
+          sectionHTML("Design Process", p.process, "cs-process") +
           (finalImages.length
-            ? '<div class="case-section" data-reveal>' +
+            ? '<div class="case-section" id="cs-final" data-reveal>' +
                 '<h2 class="case-section-label">Final Design</h2>' +
                 '<div class="case-gallery" style="padding:0;">' +
                   finalImages.map(function (src, i) {
@@ -383,9 +410,9 @@
                 "</div>" +
               "</div>"
             : "") +
-          sectionHTML("Result / Outcome", p.result) +
+          sectionHTML("Result / Outcome", p.result, "cs-result") +
           (galleryImages.length
-            ? '<div class="case-section" data-reveal>' +
+            ? '<div class="case-section" id="cs-gallery" data-reveal>' +
                 '<h2 class="case-section-label">Project Gallery</h2>' +
                 '<div class="case-gallery" style="padding:0;">' +
                   galleryImages.map(function (src, i) {
@@ -398,6 +425,29 @@
 
       wrap.innerHTML = html;
 
+      var copyBtn = wrap.querySelector(".copy-link");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", function () {
+          function done() {
+            copyBtn.textContent = "Link copied";
+            setTimeout(function () { copyBtn.textContent = "Copy link"; }, 2000);
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(location.href).then(done, function () {});
+          } else {
+            try {
+              var t = document.createElement("textarea");
+              t.value = location.href;
+              document.body.appendChild(t);
+              t.select();
+              document.execCommand("copy");
+              document.body.removeChild(t);
+              done();
+            } catch (e) {}
+          }
+        });
+      }
+
       // More projects from the same division
       var division = divisionOf(p.category);
       var related = projects.filter(function (x) { return x !== p && divisionOf(x.category) === division; }).slice(0, 3);
@@ -408,6 +458,13 @@
             '<div class="related-grid">' + related.map(function (x) { return cardHTML(x, ""); }).join("") + "</div>" +
           "</div></div>");
       }
+
+      // Invite the reader to start their own project
+      wrap.insertAdjacentHTML("beforeend",
+        '<section class="section cta-strip">' +
+          '<p class="statement-text" data-reveal>Want something like this?</p>' +
+          '<a class="btn-outline" href="contact.html" data-reveal>Start a project</a>' +
+        "</section>");
 
       // Prev / next project navigation
       var prev = idx > 0 ? projects[idx - 1] : null;
@@ -466,11 +523,153 @@
   }
 
   /* ============================================================
+     QUICK VIEW (popup on the portfolio + home pages)
+     Click a tile → the full design opens over the page. Ctrl/⌘-click
+     or middle-click still opens the full project page normally.
+     ============================================================ */
+
+  var QV_SECTIONS = [
+    ["brief", "Client brief"], ["objective", "Objective"], ["creative_direction", "Creative direction"],
+    ["process", "Design process"], ["result", "Result"]
+  ];
+  var qv = { el: null, index: -1, open: false, opener: null, pushed: false };
+
+  function qvBuild() {
+    if (qv.el) return qv.el;
+    var d = document.createElement("div");
+    d.className = "quickview";
+    d.id = "quickview";
+    d.setAttribute("role", "dialog");
+    d.setAttribute("aria-modal", "true");
+    d.setAttribute("aria-hidden", "true");
+    d.setAttribute("aria-labelledby", "qvTitle");
+    d.innerHTML =
+      '<div class="qv-bar">' +
+        '<span class="qv-count" id="qvCount"></span>' +
+        '<button class="qv-close" type="button" aria-label="Close preview">Close ✕</button>' +
+      "</div>" +
+      '<div class="qv-body" id="qvBody"></div>' +
+      '<div class="qv-nav">' +
+        '<button class="qv-step" type="button" data-step="-1"></button>' +
+        '<button class="qv-step next" type="button" data-step="1"></button>' +
+      "</div>";
+    document.body.appendChild(d);
+    qv.el = d;
+
+    d.addEventListener("click", function (e) {
+      if (e.target.closest(".qv-close")) { qvClose(); return; }
+      var step = e.target.closest(".qv-step");
+      if (step && !step.disabled) { qvShow(qv.index + parseInt(step.getAttribute("data-step"), 10)); return; }
+      var full = e.target.closest(".qv-full");
+      if (full) { qv.pushed = false; } // leaving for the full page: no need to rewind history
+    });
+    return d;
+  }
+
+  function qvShow(i) {
+    if (i < 0 || i >= quickList.length) return;
+    var p = quickList[i];
+    qv.index = i;
+    var body = document.getElementById("qvBody");
+
+    var text = QV_SECTIONS.filter(function (s) { return p[s[0]]; }).map(function (s) {
+      return '<div class="qv-block"><h3 class="qv-label">' + s[1] + "</h3><p>" + escapeHTML(p[s[0]]) + "</p></div>";
+    }).join("");
+    var meta = [p.category, p.client, p.year].filter(Boolean).map(escapeHTML).join(" · ");
+
+    body.innerHTML =
+      '<p class="qv-kicker">' + meta + "</p>" +
+      '<h2 class="qv-title" id="qvTitle">' + escapeHTML(p.title) + "</h2>" +
+      (p.video_url ? '<div class="qv-video">' + videoEmbedHTML(p.video_url) + "</div>" : "") +
+      '<div class="qv-images">' +
+        p.images.map(function (src, n) {
+          return '<img src="' + escapeAttr(src) + '" alt="' + escapeAttr(p.title) + (p.images.length > 1 ? " — image " + (n + 1) : "") + '"' + (n ? ' loading="lazy"' : "") + " />";
+        }).join("") +
+      "</div>" +
+      (text ? '<div class="qv-text">' + text + "</div>" : "") +
+      '<a class="btn-outline qv-full" href="project.html?slug=' + encodeURIComponent(p.slug) + '">Open the full case study →</a>';
+
+    document.getElementById("qvCount").textContent = (i + 1) + " / " + quickList.length;
+    var prev = quickList[i - 1], next = quickList[i + 1];
+    var bp = qv.el.querySelector('.qv-step[data-step="-1"]');
+    var bn = qv.el.querySelector('.qv-step[data-step="1"]');
+    bp.disabled = !prev; bn.disabled = !next;
+    bp.innerHTML = prev ? "← <span>" + escapeHTML(prev.title) + "</span>" : "";
+    bn.innerHTML = next ? "<span>" + escapeHTML(next.title) + "</span> →" : "";
+    qv.el.scrollTop = 0;
+  }
+
+  function qvOpen(i, opener) {
+    qvBuild();
+    qv.opener = opener || null;
+    if (!qv.open) {
+      qv.open = true;
+      qv.el.classList.add("open");
+      qv.el.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      try { history.pushState({ qv: 1 }, "", location.href); qv.pushed = true; } catch (e) { qv.pushed = false; }
+    }
+    qvShow(i);
+    qv.el.querySelector(".qv-close").focus();
+  }
+
+  function qvClose(fromPop) {
+    if (!qv.open) return;
+    qv.open = false;
+    qv.el.classList.remove("open");
+    qv.el.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    var iframe = qv.el.querySelector("iframe, video");
+    if (iframe) document.getElementById("qvBody").innerHTML = ""; // stop any playing video
+    if (!fromPop && qv.pushed) { qv.pushed = false; try { history.back(); } catch (e) {} }
+    qv.pushed = false;
+    if (qv.opener && document.body.contains(qv.opener)) qv.opener.focus();
+  }
+
+  function initQuickView() {
+    var page = document.body.getAttribute("data-page");
+    if (page !== "portfolio" && page !== "index") return;
+
+    // Capture phase, so this runs before the page-fade handler in main.js.
+    document.addEventListener("click", function (e) {
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target.closest && e.target.closest('a[href^="project.html?slug="]');
+      if (!a || (qv.el && qv.el.contains(a))) return;
+      var slug = decodeURIComponent((a.getAttribute("href").split("slug=")[1] || "").split("&")[0]);
+      var i = -1;
+      for (var k = 0; k < quickList.length; k++) { if (quickList[k].slug === slug) { i = k; break; } }
+      if (i < 0) return; // not loaded yet: just follow the link
+      e.preventDefault();
+      e.stopPropagation();
+      qvOpen(i, a);
+    }, true);
+
+    document.addEventListener("keydown", function (e) {
+      if (!qv.open) return;
+      if (e.key === "Escape") { e.preventDefault(); qvClose(); }
+      else if (e.key === "ArrowRight") { qvShow(qv.index + 1); }
+      else if (e.key === "ArrowLeft") { qvShow(qv.index - 1); }
+      else if (e.key === "Tab") {
+        // keep keyboard focus inside the popup
+        var f = Array.prototype.filter.call(qv.el.querySelectorAll("a[href], button:not([disabled]), iframe"), function (x) { return x.offsetParent !== null; });
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+
+    // Phone/browser Back button closes the popup instead of leaving the page.
+    window.addEventListener("popstate", function () { if (qv.open) { qv.pushed = false; qvClose(true); } });
+  }
+
+  /* ============================================================
      BOOT
      ============================================================ */
   document.addEventListener("DOMContentLoaded", function () {
     initHome();
     initPortfolio();
     initCaseStudy();
+    initQuickView();
   });
 })();
