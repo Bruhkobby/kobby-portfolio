@@ -1,19 +1,19 @@
 {
   "posts": [
     {
+      "slug": "colour-contrast-for-designers",
+      "title": "Colour Contrast for Designers: Make Your Text Readable for Everyone",
+      "date": "2026-10-20",
+      "category": "Design",
+      "status": "live",
+      "source": "file"
+    },
+    {
       "slug": "what-a-brand-identity-includes",
       "title": "What a Brand Identity Actually Includes (and What You Should Receive)",
       "date": "2026-10-17",
       "category": "Branding",
       "status": "live",
-      "source": "file"
-    },
-    {
-      "slug": "colour-contrast-for-designers",
-      "title": "Colour Contrast for Designers: Make Your Text Readable for Everyone",
-      "date": "2026-10-20",
-      "category": "Design",
-      "status": "scheduled",
       "source": "file"
     },
     {
