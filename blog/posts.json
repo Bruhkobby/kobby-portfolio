@@ -1,6 +1,14 @@
 {
   "posts": [
     {
+      "slug": "logo-file-formats-explained",
+      "title": "Logo File Formats Explained: PNG, JPG, SVG, PDF and When to Use Each",
+      "date": "2026-10-23",
+      "category": "Branding",
+      "status": "live",
+      "source": "file"
+    },
+    {
       "slug": "colour-contrast-for-designers",
       "title": "Colour Contrast for Designers: Make Your Text Readable for Everyone",
       "date": "2026-10-20",
@@ -14,14 +22,6 @@
       "date": "2026-10-17",
       "category": "Branding",
       "status": "live",
-      "source": "file"
-    },
-    {
-      "slug": "logo-file-formats-explained",
-      "title": "Logo File Formats Explained: PNG, JPG, SVG, PDF and When to Use Each",
-      "date": "2026-10-23",
-      "category": "Branding",
-      "status": "scheduled",
       "source": "file"
     },
     {
