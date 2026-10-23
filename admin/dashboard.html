@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://ixubjyxegefvpgdickac.supabase.co; connect-src 'self' https://ixubjyxegefvpgdickac.supabase.co wss://ixubjyxegefvpgdickac.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <script src="../js/framebust.js"></script>
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://ixubjyxegefvpgdickac.supabase.co; connect-src 'self' https://ixubjyxegefvpgdickac.supabase.co wss://ixubjyxegefvpgdickac.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <title>Dashboard — Portfolio CMS</title>
   <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -370,6 +372,38 @@ Normal paragraph text. **Bold**, *italic*, and a [link](https://example.com).
           </p>
         </div>
 
+        <!-- Two-step sign-in -->
+        <div class="card" id="mfaCard">
+          <h3>Two-step sign-in</h3>
+          <p class="muted small">
+            Adds a 6-digit code from an authenticator app (Google Authenticator, Microsoft Authenticator, Authy…)
+            on top of your password. Even if someone steals your password, they still can't open your admin.
+          </p>
+          <p id="mfaState" class="muted">Checking…</p>
+          <div id="mfaEnroll" hidden>
+            <ol class="small" style="margin:0 0 0.8rem 1.1rem;">
+              <li>Open your authenticator app and choose "add account" / "scan QR code".</li>
+              <li>Scan this picture (or type the key under it).</li>
+              <li>Type the 6-digit code the app shows, then press Turn on.</li>
+            </ol>
+            <img id="mfaQr" alt="QR code to scan with your authenticator app" width="180" height="180" style="background:#fff;padding:6px;border-radius:6px;" />
+            <p class="small muted" style="margin-top:0.5rem;">Can't scan? Type this key instead: <code id="mfaSecret"></code></p>
+            <label class="field">
+              <span>6-digit code from the app</span>
+              <input type="text" id="mfaEnrollCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="123456" />
+            </label>
+            <div class="alert alert-error" id="mfaEnrollError" hidden></div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-primary" id="mfaEnrollConfirm">Turn on</button>
+              <button type="button" class="btn btn-ghost" id="mfaEnrollCancel">Cancel</button>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="mfaStart" hidden>Set up two-step sign-in</button>
+            <button type="button" class="btn btn-danger" id="mfaOff" hidden>Turn off</button>
+          </div>
+        </div>
+
         <!-- Change password -->
         <div class="card">
           <h3>Change Password</h3>
@@ -379,12 +413,12 @@ Normal paragraph text. **Bold**, *italic*, and a [link](https://example.com).
               <input type="password" id="pwCurrent" required autocomplete="current-password" />
             </label>
             <label class="field">
-              <span>New password (min 8 characters)</span>
-              <input type="password" id="pwNew" required minlength="8" autocomplete="new-password" />
+              <span>New password (min 12 characters)</span>
+              <input type="password" id="pwNew" required minlength="12" autocomplete="new-password" />
             </label>
             <label class="field">
               <span>Confirm new password</span>
-              <input type="password" id="pwConfirm" required minlength="8" autocomplete="new-password" />
+              <input type="password" id="pwConfirm" required minlength="12" autocomplete="new-password" />
             </label>
             <div class="alert alert-error" id="pwError" hidden></div>
             <div class="form-actions">
@@ -418,9 +452,9 @@ Normal paragraph text. **Bold**, *italic*, and a [link](https://example.com).
 
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js" defer></script>
   <script src="../js/config.js" defer></script>
-  <script src="admin.js?v=6" defer></script>
+  <script src="admin.js?v=7" defer></script>
   <script src="panels.js?v=1" defer></script>
 </body>
 </html>

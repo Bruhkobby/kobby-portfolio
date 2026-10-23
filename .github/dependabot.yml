@@ -1,0 +1,8 @@
+# Keeps the automation's building blocks (GitHub Actions) up to date.
+# GitHub opens a pull request when a new version or a security fix is out.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

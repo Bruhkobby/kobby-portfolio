@@ -32,21 +32,61 @@
   function initLogin() {
     if (!requireSupabase()) return;
 
-    // Already signed in? Go straight to the dashboard.
-    window.sb.auth.getSession().then(function (res) {
-      if (res.data && res.data.session) {
-        markOwner();
-        location.href = "dashboard.html";
-      }
-    });
-
     var form = document.getElementById("loginForm");
     var errorBox = document.getElementById("loginError");
     var btn = document.getElementById("loginBtn");
+    var mfaForm = document.getElementById("mfaForm");
+    var mfaError = document.getElementById("mfaError");
+    var mfaBtn = document.getElementById("mfaBtn");
+
+    // After 5 wrong passwords in a row, the button pauses for a minute (it grows each time).
+    // The real protection is on the server; this just stops a person (or a script on this page) hammering it.
+    var LOCK_KEY = "kobbyLoginLock";
+    function lockState() {
+      try { return JSON.parse(localStorage.getItem(LOCK_KEY) || "{}") || {}; } catch (e) { return {}; }
+    }
+    function saveLock(v) { try { localStorage.setItem(LOCK_KEY, JSON.stringify(v)); } catch (e) {} }
+    function waitSeconds() {
+      var st = lockState();
+      return st.until && st.until > Date.now() ? Math.ceil((st.until - Date.now()) / 1000) : 0;
+    }
+    function recordFailure() {
+      var st = lockState();
+      st.fails = (st.fails || 0) + 1;
+      if (st.fails % 5 === 0) st.until = Date.now() + Math.min(15, st.fails / 5) * 60 * 1000;
+      saveLock(st);
+    }
+
+    function showMfa() {
+      form.hidden = true;
+      mfaForm.hidden = false;
+      document.getElementById("mfaCode").value = "";
+      document.getElementById("mfaCode").focus();
+    }
+    // Password was right. Does this account also need the 6-digit code?
+    function continueAfterPassword() {
+      return window.sb.auth.mfa.getAuthenticatorAssuranceLevel().then(function (r) {
+        var d = r && r.data;
+        if (d && d.nextLevel === "aal2" && d.currentLevel !== "aal2") { showMfa(); return; }
+        markOwner();
+        location.href = "dashboard.html";
+      }, function () { markOwner(); location.href = "dashboard.html"; });
+    }
+
+    // Already signed in? Go on (and ask for the code first if two-step sign-in is on).
+    window.sb.auth.getSession().then(function (res) {
+      if (res.data && res.data.session) continueAfterPassword();
+    });
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       errorBox.hidden = true;
+      var wait = waitSeconds();
+      if (wait) {
+        errorBox.textContent = "Too many tries. Please wait " + wait + " seconds and try again.";
+        errorBox.hidden = false;
+        return;
+      }
       btn.disabled = true;
       btn.textContent = "Signing in…";
 
@@ -56,15 +96,48 @@
       window.sb.auth.signInWithPassword({ email: email, password: password })
         .then(function (res) {
           if (res.error) throw res.error;
-          markOwner();
-          location.href = "dashboard.html";
+          saveLock({});
+          return continueAfterPassword();
         })
         .catch(function (err) {
-          errorBox.textContent = err.message || "Sign in failed. Check your email and password.";
+          recordFailure();
+          errorBox.textContent = /rate|too many/i.test((err && err.message) || "")
+            ? "Too many tries. Please wait a few minutes and try again."
+            : "Sign in failed. Check your email and password.";
           errorBox.hidden = false;
           btn.disabled = false;
           btn.textContent = "Sign in";
         });
+    });
+
+    mfaForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      mfaError.hidden = true;
+      var code = document.getElementById("mfaCode").value.replace(/\s/g, "");
+      if (!/^\d{6}$/.test(code)) { mfaError.textContent = "Enter the 6 digits from your authenticator app."; mfaError.hidden = false; return; }
+      mfaBtn.disabled = true;
+      var factorId = null;
+      window.sb.auth.mfa.listFactors().then(function (r) {
+        if (r.error) throw r.error;
+        var f = ((r.data && r.data.totp) || []).filter(function (x) { return x.status === "verified"; })[0];
+        if (!f) throw new Error("No authenticator found for this account.");
+        factorId = f.id;
+        return window.sb.auth.mfa.challenge({ factorId: factorId });
+      }).then(function (c) {
+        if (c.error) throw c.error;
+        return window.sb.auth.mfa.verify({ factorId: factorId, challengeId: c.data.id, code: code });
+      }).then(function (v) {
+        if (v.error) throw v.error;
+        markOwner();
+        location.href = "dashboard.html";
+      }).catch(function (err) {
+        mfaBtn.disabled = false;
+        mfaError.textContent = /invalid|expired|code/i.test((err && err.message) || "") ? "That code didn't work. Check the app and try the new code." : ((err && err.message) || "Could not verify the code.");
+        mfaError.hidden = false;
+      });
+    });
+    document.getElementById("mfaCancel").addEventListener("click", function () {
+      window.sb.auth.signOut().then(function () { location.reload(); }, function () { location.reload(); });
     });
   }
 
@@ -126,6 +199,19 @@
     renderProjectList();
   });
 
+  // Signs you out after 30 minutes with no activity, so a forgotten open tab can't be misused.
+  function startIdleTimer() {
+    var LIMIT = 30 * 60 * 1000, timer = null;
+    function expire() {
+      window.sb.auth.signOut().then(function () { location.href = "index.html"; }, function () { location.href = "index.html"; });
+    }
+    function reset() { clearTimeout(timer); timer = setTimeout(expire, LIMIT); }
+    ["click", "keydown", "touchstart", "scroll", "mousemove"].forEach(function (ev) {
+      document.addEventListener(ev, reset, { passive: true });
+    });
+    reset();
+  }
+
   function initDashboard() {
     fillCategorySelect();
     if (!requireSupabase()) {
@@ -145,9 +231,24 @@
       if (emailEl) emailEl.textContent = user.email || "";
       var accEmail = $("accountEmail");
       if (accEmail) accEmail.textContent = user.email || "";
-      markOwner();
-      loadProjects().then(function () {
-        if (window.AdminPanels && window.AdminPanels.overview) window.AdminPanels.overview.show();
+      // Only the site owner may use the dashboard. (The database enforces this too;
+      // this just gives anyone else a clear exit instead of an empty screen.)
+      // If two-step sign-in is on and the code hasn't been entered yet, go back and ask for it.
+      window.sb.auth.mfa.getAuthenticatorAssuranceLevel().then(function (a) {
+        var d = a && a.data;
+        if (d && d.nextLevel === "aal2" && d.currentLevel !== "aal2") { location.href = "index.html"; return null; }
+        return window.sb.rpc("is_admin");
+      }, function () { return window.sb.rpc("is_admin"); }).then(function (r) {
+        if (!r) return;
+        if (!r.error && r.data === false) {
+          window.sb.auth.signOut().then(function () { location.href = "index.html"; });
+          return;
+        }
+        markOwner();
+        startIdleTimer();
+        loadProjects().then(function () {
+          if (window.AdminPanels && window.AdminPanels.overview) window.AdminPanels.overview.show();
+        });
       });
     });
 
@@ -199,6 +300,7 @@
 
     // ---- Account tab ----
     $("passwordForm").addEventListener("submit", changePassword);
+    initMfaCard();
     $("exportBtn").addEventListener("click", exportBackup);
     $("signOutAllBtn").addEventListener("click", signOutAll);
 
@@ -1003,7 +1105,7 @@
     var next = $("pwNew").value;
     var confirm = $("pwConfirm").value;
 
-    if (next.length < 8) { showError(errBox, "New password must be at least 8 characters."); return; }
+    if (next.length < 12) { showError(errBox, "New password must be at least 12 characters. A few random words joined together works well."); return; }
     if (next !== confirm) { showError(errBox, "New passwords do not match."); return; }
     if (next === current) { showError(errBox, "The new password is the same as the current one."); return; }
 
@@ -1033,6 +1135,92 @@
         btn.textContent = "Update Password";
         showError(errBox, err.message || "Could not update the password.");
       });
+  }
+
+  /* ============================================================
+     TWO-STEP SIGN-IN (authenticator app)
+     ============================================================ */
+  function initMfaCard() {
+    var stateEl = $("mfaState"), enrollBox = $("mfaEnroll"), startBtn = $("mfaStart"), offBtn = $("mfaOff");
+    var pending = null;   // factor being set up
+
+    function refresh() {
+      enrollBox.hidden = true;
+      startBtn.hidden = offBtn.hidden = true;
+      window.sb.auth.mfa.listFactors().then(function (r) {
+        if (r.error) throw r.error;
+        var active = ((r.data && r.data.totp) || []).filter(function (f) { return f.status === "verified"; })[0];
+        if (active) {
+          stateEl.textContent = "On ✓ — signing in needs your password and a code from your authenticator app.";
+          offBtn.hidden = false;
+          offBtn.setAttribute("data-factor", active.id);
+        } else {
+          stateEl.textContent = "Off — only your password protects the admin. Turning this on is strongly recommended.";
+          startBtn.hidden = false;
+        }
+      }).catch(function () { stateEl.textContent = "Could not check two-step sign-in right now."; });
+    }
+
+    startBtn.addEventListener("click", function () {
+      var err = $("mfaEnrollError"); err.hidden = true;
+      startBtn.disabled = true;
+      // remove leftovers from an abandoned earlier attempt, then start fresh
+      window.sb.auth.mfa.listFactors().then(function (r) {
+        var stale = ((r.data && r.data.all) || []).filter(function (f) { return f.status !== "verified"; });
+        return Promise.all(stale.map(function (f) { return window.sb.auth.mfa.unenroll({ factorId: f.id }); }));
+      }).then(function () {
+        return window.sb.auth.mfa.enroll({ factorType: "totp", friendlyName: "Authenticator " + new Date().toISOString().slice(0, 10) + "-" + Math.random().toString(36).slice(2, 6) });
+      }).then(function (r) {
+        startBtn.disabled = false;
+        if (r.error) throw r.error;
+        pending = r.data;
+        $("mfaQr").src = r.data.totp.qr_code;
+        $("mfaSecret").textContent = r.data.totp.secret;
+        $("mfaEnrollCode").value = "";
+        enrollBox.hidden = false;
+        startBtn.hidden = true;
+        $("mfaEnrollCode").focus();
+      }).catch(function (e) {
+        startBtn.disabled = false;
+        err.textContent = "Could not start setup: " + ((e && e.message) || e);
+        err.hidden = false; enrollBox.hidden = false;
+      });
+    });
+
+    $("mfaEnrollCancel").addEventListener("click", function () {
+      var f = pending; pending = null;
+      if (f) window.sb.auth.mfa.unenroll({ factorId: f.id }).then(refresh, refresh); else refresh();
+    });
+
+    $("mfaEnrollConfirm").addEventListener("click", function () {
+      var err = $("mfaEnrollError"); err.hidden = true;
+      var code = $("mfaEnrollCode").value.replace(/\s/g, "");
+      if (!pending) return;
+      if (!/^\d{6}$/.test(code)) { err.textContent = "Enter the 6 digits shown in your authenticator app."; err.hidden = false; return; }
+      window.sb.auth.mfa.challenge({ factorId: pending.id }).then(function (c) {
+        if (c.error) throw c.error;
+        return window.sb.auth.mfa.verify({ factorId: pending.id, challengeId: c.data.id, code: code });
+      }).then(function (v) {
+        if (v.error) throw v.error;
+        pending = null;
+        logActivity("Turned on two-step sign-in", "");
+        refresh();
+      }).catch(function (e) {
+        err.textContent = "That code didn't work. Check the app and try the newest code. (" + ((e && e.message) || e) + ")";
+        err.hidden = false;
+      });
+    });
+
+    offBtn.addEventListener("click", function () {
+      if (!confirm("Turn off two-step sign-in? Your admin will then be protected by your password only.")) return;
+      window.sb.auth.mfa.unenroll({ factorId: offBtn.getAttribute("data-factor") }).then(function (r) {
+        if (r.error) { alert("Could not turn it off: " + r.error.message); return; }
+        logActivity("Turned off two-step sign-in", "");
+        refresh();
+      });
+    });
+
+    refresh();
   }
 
   function exportBackup() {

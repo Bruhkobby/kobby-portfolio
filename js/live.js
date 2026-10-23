@@ -87,8 +87,10 @@
     var slug = null;
     if (file === "project.html") {
       slug = new URLSearchParams(location.search).get("slug");
-      if (slug) slug = slug.slice(0, 120);
+      if (slug) slug = slug.toLowerCase().slice(0, 120);
+      if (slug && !/^[a-z0-9-]+$/.test(slug)) slug = null;   // matches the database check
     }
+    file = file.toLowerCase().replace(/[^a-z0-9._\/-]/g, "").slice(0, 200) || "index.html";
     var once = "kobbyV:" + file + ":" + (slug || "");
     var entry = true;
     try {
@@ -102,7 +104,8 @@
     try {
       if (document.referrer) {
         var h = new URL(document.referrer).hostname.replace(/^www\./, "");
-        if (h && h !== host.replace(/^www\./, "")) ref = h.slice(0, 120);
+        if (h && h !== host.replace(/^www\./, "")) ref = h.toLowerCase().slice(0, 120);
+        if (ref && !/^[a-z0-9.-]+$/.test(ref)) ref = null;
       }
     } catch (e) {}
     var w = window.innerWidth;

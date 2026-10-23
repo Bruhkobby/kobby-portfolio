@@ -25,6 +25,9 @@ import sys
 
 import markdown
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from sanitize import sanitize  # noqa: E402
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 POSTS_DIR = ROOT / "blog-src" / "posts"
 ADMIN_POSTS_DIR = ROOT / "blog-src" / "posts-admin"   # copied from the admin by fetch_admin_posts.py
@@ -59,6 +62,11 @@ def parse_post(path):
     words = len(re.findall(r"\w+", body_md))
     md = markdown.Markdown(extensions=["tables", "sane_lists", "toc"])
     body_html = md.convert(body_md)
+    # Posts written in the admin come from the database: clean them with an allow-list
+    # (no scripts, frames, forms or unsafe links). Posts committed to the repo are trusted.
+    from_admin = path.resolve().parent == ADMIN_POSTS_DIR.resolve()
+    if from_admin:
+        body_html = sanitize(body_html)
     # Open outside links in a new tab, safely.
     body_html = re.sub(r'<a href="(https?://[^"]+)"', r'<a href="\1" target="_blank" rel="noopener"', body_html)
     if len(meta["description"]) > 170:
@@ -70,7 +78,7 @@ def parse_post(path):
         "category": meta["category"],
         "date": date,
         "updated": dt.date.fromisoformat(meta["updated"]) if meta.get("updated") else date,
-        "source": meta.get("source", "file"),
+        "source": "admin" if from_admin else "file",
         "minutes": max(1, math.ceil(words / 220)),
         "html": body_html,
     }

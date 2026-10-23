@@ -33,6 +33,29 @@ def one_line(value):
     return re.sub(r"\s+", " ", value or "").strip()
 
 
+# Posts come from the database, so they are checked before they can reach the site:
+# no scripts, frames, forms, inline event handlers or javascript: links.
+UNSAFE = re.compile(
+    r"<\s*(script|iframe|object|embed|form|style|link|meta|base|svg|math)\b"
+    r"|\son\w+\s*="
+    r"|javascript\s*:|vbscript\s*:|data\s*:\s*text/html",
+    re.IGNORECASE,
+)
+
+
+SLUG_OK = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+DATE_OK = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def is_safe(post):
+    if not SLUG_OK.match(str(post.get("slug") or "")) or len(post["slug"]) > 100:
+        return False
+    if not DATE_OK.match(str(post.get("publish_on") or "")):
+        return False
+    text = " ".join(str(post.get(k) or "") for k in ("title", "description", "category", "body_md"))
+    return not UNSAFE.search(text)
+
+
 def main():
     url, key = read_config()
     req = urllib.request.Request(
@@ -48,6 +71,13 @@ def main():
 
     OUT.mkdir(parents=True, exist_ok=True)
     keep = set()
+    safe_rows = []
+    for p in rows:
+        if is_safe(p):
+            safe_rows.append(p)
+        else:
+            print(f"warning: skipped '{p.get('slug')}' because it contains HTML that is not allowed.", file=sys.stderr)
+    rows = safe_rows
     for p in rows:
         name = f"{p['publish_on']}-{p['slug']}.md"
         keep.add(name)

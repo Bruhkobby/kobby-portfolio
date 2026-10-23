@@ -6,6 +6,13 @@
 (function () {
   "use strict";
 
+  // Don't let other sites show this page inside a hidden frame (clickjacking).
+  if (window.top !== window.self) {
+    document.documentElement.style.display = "none";
+    try { window.top.location = window.self.location; } catch (e) {}
+    return;
+  }
+
   /* ---------- Footer year ---------- */
   document.querySelectorAll("[data-year]").forEach(function (el) {
     el.textContent = new Date().getFullYear();

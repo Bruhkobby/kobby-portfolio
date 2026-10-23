@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://ixubjyxegefvpgdickac.supabase.co; connect-src 'self' https://ixubjyxegefvpgdickac.supabase.co wss://ixubjyxegefvpgdickac.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <script src="../js/framebust.js"></script>
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://ixubjyxegefvpgdickac.supabase.co; connect-src 'self' https://ixubjyxegefvpgdickac.supabase.co wss://ixubjyxegefvpgdickac.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'" />
   <title>Sign in — Portfolio CMS</title>
   <link rel="icon" href="../assets/icons/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,13 +42,24 @@
         <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Sign in</button>
       </form>
 
+      <form id="mfaForm" autocomplete="off" hidden>
+        <p class="muted small" style="margin-bottom:1rem;">Open your authenticator app and type the 6-digit code shown for this site.</p>
+        <label class="field">
+          <span>6-digit code</span>
+          <input type="text" id="mfaCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required placeholder="123456" />
+        </label>
+        <div class="alert alert-error" id="mfaError" hidden></div>
+        <button type="submit" class="btn btn-primary btn-block" id="mfaBtn">Verify</button>
+        <button type="button" class="btn btn-ghost btn-block" id="mfaCancel" style="margin-top:0.5rem;">Use a different account</button>
+      </form>
+
       <p class="auth-note">Only the admin account created in your Supabase dashboard can sign in.</p>
       <a class="auth-back" href="../index.html">← Back to website</a>
     </div>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.min.js" defer></script>
   <script src="../js/config.js" defer></script>
-  <script src="admin.js?v=2" defer></script>
+  <script src="admin.js?v=7" defer></script>
 </body>
 </html>
