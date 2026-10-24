@@ -86,6 +86,12 @@
       process: p.process || "",
       result: p.result || "",
       video_url: p.video_url || "",
+      services: p.services || "",
+      tools: p.tools || "",
+      duration: p.duration || "",
+      highlights: p.highlights || "",
+      client_quote: p.client_quote || "",
+      client_quote_by: p.client_quote_by || "",
       featured: Boolean(p.featured),
       images: images,
       alts: alts,
@@ -157,7 +163,7 @@
             '<img src="' + escapeAttr(featured.cover) + '" alt="' + escapeAttr(altFor(featured, 0, featured.title)) + '" />' +
           "</a>" +
           '<div class="featured-meta" data-reveal>' +
-            '<h3 class="featured-title"><a href="project.html?slug=' + encodeURIComponent(featured.slug) + '">' + escapeHTML(featured.title) + "</a></h3>" +
+            '<h2 class="featured-title"><a href="project.html?slug=' + encodeURIComponent(featured.slug) + '">' + escapeHTML(featured.title) + "</a></h2>" +
             '<p class="featured-tags">' + escapeHTML(featured.category) + (featured.year ? " — " + escapeHTML(featured.year) : "") + "</p>" +
           "</div>"
         );
@@ -277,6 +283,30 @@
   /* ============================================================
      CASE STUDY PAGE
      ============================================================ */
+
+  // "number | meaning" lines -> big figures. Shows nothing unless you wrote real ones.
+  function highlightsHTML(text) {
+    var rows = String(text || "").split(/\r?\n/).map(function (l) {
+      var i = l.indexOf("|");
+      if (i < 1) return null;
+      var v = l.slice(0, i).trim(), t = l.slice(i + 1).trim();
+      return v && t ? { v: v.slice(0, 24), t: t.slice(0, 80) } : null;
+    }).filter(Boolean).slice(0, 4);
+    if (!rows.length) return "";
+    return '<ul class="case-highlights" data-reveal aria-label="Key results">' +
+      rows.map(function (r) {
+        return '<li><span class="case-highlight-value">' + escapeHTML(r.v) + '</span><span class="case-highlight-text">' + escapeHTML(r.t) + "</span></li>";
+      }).join("") + "</ul>";
+  }
+
+  // A client's own words, shown only when you added a real quote.
+  function quoteHTML(quote, by) {
+    if (!quote) return "";
+    return '<div class="case-section case-quote-section" data-reveal>' +
+      '<h2 class="case-section-label">Client feedback</h2>' +
+      '<figure class="case-quote"><blockquote><p>' + escapeHTML(quote) + "</p></blockquote>" +
+      (by ? "<figcaption>" + escapeHTML(by) + "</figcaption>" : "") + "</figure></div>";
+  }
 
   function sectionHTML(label, text, id) {
     if (!text) return "";
@@ -415,11 +445,15 @@
             '<div class="case-meta-item"><span class="case-meta-label">Category</span><span class="case-meta-value">' + escapeHTML(p.category) + "</span></div>" +
             (p.client ? '<div class="case-meta-item"><span class="case-meta-label">Client</span><span class="case-meta-value">' + escapeHTML(p.client) + "</span></div>" : "") +
             (p.year ? '<div class="case-meta-item"><span class="case-meta-label">Year</span><span class="case-meta-value">' + escapeHTML(p.year) + "</span></div>" : "") +
+            (p.duration ? '<div class="case-meta-item"><span class="case-meta-label">Timeline</span><span class="case-meta-value">' + escapeHTML(p.duration) + "</span></div>" : "") +
+            (p.services ? '<div class="case-meta-item case-meta-wide"><span class="case-meta-label">What I did</span><span class="case-meta-value">' + escapeHTML(p.services) + "</span></div>" : "") +
+            (p.tools ? '<div class="case-meta-item case-meta-wide"><span class="case-meta-label">Tools</span><span class="case-meta-value">' + escapeHTML(p.tools) + "</span></div>" : "") +
             (words ? '<div class="case-meta-item"><span class="case-meta-label">Reading time</span><span class="case-meta-value">' + minutes + " min</span></div>" : "") +
           "</div>" +
           jumpHTML +
         "</div>" +
         '<div class="case-hero-media" data-reveal><div class="frame"><img src="' + escapeAttr(p.cover) + '" alt="' + escapeAttr(altFor(p, 0, p.title)) + '" /></div></div>' +
+        highlightsHTML(p.highlights) +
         '<div class="case-body">' +
           (p.video_url ? '<div class="case-section" id="cs-video" data-reveal>' + '<h2 class="case-section-label">Motion</h2>' + videoEmbedHTML(p.video_url) + "</div>" : "") +
           sectionHTML("Client Brief", p.brief, "cs-brief") +
@@ -437,6 +471,7 @@
               "</div>"
             : "") +
           sectionHTML("Result / Outcome", p.result, "cs-result") +
+          quoteHTML(p.client_quote, p.client_quote_by) +
           (galleryImages.length
             ? '<div class="case-section" id="cs-gallery" data-reveal>' +
                 '<h2 class="case-section-label">Project Gallery</h2>' +

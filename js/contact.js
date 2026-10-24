@@ -35,6 +35,16 @@
     status.classList.toggle("error", Boolean(isError));
   }
 
+  // Mark the field that needs fixing and move keyboard / screen-reader focus to it.
+  function flag(id) {
+    ["cfName", "cfEmail", "cfMessage"].forEach(function (f) {
+      var el = document.getElementById(f);
+      if (el) el.removeAttribute("aria-invalid");
+    });
+    var box = document.getElementById(id);
+    if (box) { box.setAttribute("aria-invalid", "true"); box.focus(); }
+  }
+
   function validEmail(v) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
   }
@@ -49,9 +59,9 @@
     var company = document.getElementById("cfCompany").value; // honeypot
 
     status.hidden = false;
-    if (!name || !message) { setStatus("Please fill in your name and message.", true); return; }
-    if (!validEmail(email)) { setStatus("Please enter a valid email address.", true); return; }
-    if (message.length < 10) { setStatus("Your message is a little short — tell me a bit more.", true); return; }
+    if (!name || !message) { setStatus("Please fill in your name and message.", true); flag(!name ? "cfName" : "cfMessage"); return; }
+    if (!validEmail(email)) { setStatus("Please enter a valid email address.", true); flag("cfEmail"); return; }
+    if (message.length < 10) { setStatus("Your message is a little short — tell me a bit more.", true); flag("cfMessage"); return; }
 
     // Bots fill the hidden field — silently pretend success.
     if (company) {

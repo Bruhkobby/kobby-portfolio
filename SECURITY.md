@@ -25,3 +25,7 @@ In the Supabase SQL Editor run `delete from auth.mfa_factors where user_id = '<y
 ## Reporting a problem
 
 Email the address on the contact page.
+
+## Message alerts
+
+`sql/upgrade-alerts.sql` sends a WhatsApp (or ntfy phone) alert for each new contact message. The key lives in the private `alert_config` table, which the website and visitors cannot read, and an alert failing never blocks a message. At most one alert is sent per minute.

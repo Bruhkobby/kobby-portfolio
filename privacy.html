@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=10" />
+  <link rel="stylesheet" href="css/style.css?v=11" />
   <link rel="stylesheet" href="css/responsive.css" />
 </head>
 <body class="page" data-page="privacy">
@@ -64,7 +64,7 @@
 
     <section class="page-hero">
       <h1 class="page-title" data-reveal>Privacy</h1>
-      <p class="page-sub" data-reveal>What this website collects, and what I do with it. Last updated 18 October 2026.</p>
+      <p class="page-sub" data-reveal>What this website collects, and what I do with it. Last updated 24 October 2026.</p>
     </section>
 
     <div class="case-body">
@@ -109,6 +109,7 @@
         <p>To run this site I rely on a few services. They handle data on my behalf or when your browser loads the site:</p>
         <ul>
           <li><strong>Supabase</strong> stores contact-form messages and the images and details of the projects shown on this site. The database is hosted in London (UK).</li>
+          <li><strong>A message-alert service</strong> (CallMeBot for WhatsApp, or ntfy for phone notifications) receives a short copy of each new contact message, meaning your name, the first part of your message and the contact details you gave, so I'm alerted on my phone straight away. It is used only for that alert.</li>
           <li><strong>GitHub Pages</strong> hosts the website. Like most web hosts, it may log technical details such as your IP address when you visit.</li>
           <li><strong>Google Fonts</strong> supplies the typefaces. Your browser requests them directly from Google, which can see your IP address.</li>
           <li><strong>jsDelivr</strong> delivers a code library the site needs to talk to the database.</li>

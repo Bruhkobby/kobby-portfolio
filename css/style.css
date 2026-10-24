@@ -191,6 +191,7 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
 }
 .section-rule { flex: 1; height: 1px; background: var(--line); }
 .section-link {
+  padding-block: 0.4rem; margin-block: -0.4rem;   /* 24px+ tap target, same layout */
   font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.18em;
@@ -571,7 +572,7 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
 .prose .sources { font-size: 0.92em; color: var(--muted); }
 
 /* ---------- Divisions (portfolio page) ---------- */
-.filter-count { font-size: 0.62rem; margin-left: 0.25rem; opacity: 0.6; letter-spacing: 0.05em; }
+.filter-count { font-size: 0.68rem; margin-left: 0.25rem; letter-spacing: 0.05em; }
 .division + .division { margin-top: clamp(3.5rem, 8vw, 7rem); }
 .division .section-head { margin-bottom: 1rem; }
 .division .section-label { font-size: 0.78rem; color: var(--ink); }
@@ -737,6 +738,7 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
 .project-page { max-width: var(--max-w); margin: 0 auto; }
 .case-hero { padding: clamp(9rem, 18vh, 13rem) var(--gutter) 0; }
 .case-back {
+  padding-block: 0.4rem; margin-top: -0.4rem;     /* 24px+ tap target, same layout */
   display: inline-block;
   font-size: 0.72rem;
   letter-spacing: 0.2em;
@@ -770,6 +772,39 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
   color: var(--muted);
 }
 .case-meta-value { font-size: 0.95rem; font-weight: 400; }
+
+.case-meta-wide { flex-basis: 100%; max-width: 62ch; }
+
+/* Key results strip + client quote (only shown when real content is added in the admin) */
+.case-highlights {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 2rem clamp(1.5rem, 4vw, 4rem);
+  margin: clamp(2.5rem, 5vw, 4rem) var(--gutter) 0;
+  padding: 2rem 0 0;
+  border-top: 1px solid var(--line);
+}
+.case-highlight-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent-deep, var(--accent));
+}
+.case-highlight-text { display: block; margin-top: 0.6rem; font-size: 0.9rem; color: var(--muted); max-width: 22ch; }
+.case-quote { margin: 0; max-width: 56ch; }
+.case-quote blockquote { margin: 0; }
+.case-quote p {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.6vw, 2rem);
+  line-height: 1.35;
+  font-weight: 600;
+}
+.case-quote p::before { content: "\201C"; }
+.case-quote p::after { content: "\201D"; }
+.case-quote figcaption { margin-top: 1.2rem; font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
 
 .case-hero-media { margin: clamp(2.5rem, 5vw, 4.5rem) var(--gutter) 0; }
 .case-hero-media .frame { overflow: hidden; background: var(--bg-soft); aspect-ratio: 16 / 8; }
@@ -1180,7 +1215,7 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
   letter-spacing: 0.06em;
   color: var(--ink);
   border-bottom: 1px solid var(--line);
-  padding-bottom: 2px;
+  padding-block: 0.4rem 2px;
   transition: color 0.3s, border-color 0.3s;
 }
 .copy-email:hover { color: var(--accent); border-color: var(--accent); }
@@ -1345,4 +1380,5 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
   font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase;
   padding: 0.7rem 1rem;
 }
-em.optional { font-style: normal; text-transform: none; letter-spacing: 0; opacity: 0.6; }
+em.optional { font-style: normal; text-transform: none; letter-spacing: 0; }
+

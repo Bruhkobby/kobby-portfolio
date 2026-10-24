@@ -317,7 +317,10 @@
     // ---- Project editor extras ----
     $("previewBtn").addEventListener("click", function () { if (state.editingId) previewProject(currentEditing()); });
     $("copyLinkBtn").addEventListener("click", function () { if (state.editingId) copyProjectLink(currentEditing(), $("copyLinkBtn")); });
-    $("templateBtn").addEventListener("click", insertTemplate);
+    $("templateBtn").addEventListener("click", function () { insertTemplate(); updateStoryMeter(); });
+    ["fBrief", "fObjective", "fCreative", "fProcess", "fResult"].forEach(function (id) {
+      $(id).addEventListener("input", updateStoryMeter);
+    });
     $("clearScheduleBtn").addEventListener("click", function () { $("fPublishAt").value = ""; });
   }
 
@@ -526,7 +529,8 @@
     window.sb.from("projects").insert({
       title: p.title + " (copy)", slug: slug, category: p.category, client: p.client, year: p.year,
       brief: p.brief, objective: p.objective, creative_direction: p.creative_direction, process: p.process,
-      result: p.result, video_url: p.video_url, featured: false, published: false, sort_order: nextOrder
+      result: p.result, video_url: p.video_url, featured: false, published: false, sort_order: nextOrder,
+      ...("services" in p ? { services: p.services, tools: p.tools, duration: p.duration, highlights: p.highlights, client_quote: p.client_quote, client_quote_by: p.client_quote_by } : {})
     }).select().single().then(function (res) {
       if (res.error) throw res.error;
       logActivity("Duplicated project", p.title);
@@ -607,6 +611,7 @@
     $("templateStatus").textContent = "";
     $("templateSelect").value = "";
     $("fPublishAt").value = "";
+    $("storyMeter").textContent = "";
     $("previewBtn").hidden = !projectId;
     $("copyLinkBtn").hidden = !projectId;
 
@@ -626,6 +631,12 @@
       $("fProcess").value = p.process || "";
       $("fResult").value = p.result || "";
       $("fVideo").value = p.video_url || "";
+      $("fServices").value = p.services || "";
+      $("fTools").value = p.tools || "";
+      $("fDuration").value = p.duration || "";
+      $("fHighlights").value = p.highlights || "";
+      $("fQuote").value = p.client_quote || "";
+      $("fQuoteBy").value = p.client_quote_by || "";
       $("fFeatured").checked = Boolean(p.featured);
       $("fPublished").checked = Boolean(p.published);
       $("fPublishAt").value = p.publish_at ? toLocalInput(p.publish_at) : "";
@@ -642,7 +653,18 @@
 
     $("listView").hidden = true;
     $("editorView").hidden = false;
+    updateStoryMeter();
     window.scrollTo(0, 0);
+  }
+
+  // Tells you how complete the case study is, so thin projects are easy to spot.
+  function updateStoryMeter() {
+    var ids = ["fBrief", "fObjective", "fCreative", "fProcess", "fResult"];
+    var done = ids.filter(function (id) { return $(id).value.trim().length > 20; }).length;
+    var msg = done + " of 5 story sections written";
+    if (done === 5) msg += " — a full case study ✓";
+    else if (done < 3) msg += " — projects with at least 3 sections read as real case studies";
+    $("storyMeter").textContent = msg;
   }
 
   // <input type="datetime-local"> wants local time without a zone
@@ -678,6 +700,22 @@
       publish_at: $("fPublishAt").value ? new Date($("fPublishAt").value).toISOString() : null,
       updated_at: new Date().toISOString()
     };
+    var extras = {
+      services: $("fServices").value.trim(),
+      tools: $("fTools").value.trim(),
+      duration: $("fDuration").value.trim(),
+      highlights: $("fHighlights").value.trim(),
+      client_quote: $("fQuote").value.trim(),
+      client_quote_by: $("fQuoteBy").value.trim()
+    };
+    var hasExtras = Object.keys(extras).some(function (k) { return extras[k]; });
+    // Only send the new fields once the database has them (see sql/upgrade-case-studies.sql).
+    var dbHasExtras = state.projects.length ? ("services" in state.projects[0]) : true;
+    if (dbHasExtras) Object.assign(payload, extras);
+    else if (hasExtras) {
+      showError(errorBox, "The case-study details need a one-time database update first. Run the new SQL file (upgrade-case-studies.sql), then save again.");
+      return;
+    }
 
     // Don't publish starter text that still has [placeholders] in it.
     if (payload.published) {

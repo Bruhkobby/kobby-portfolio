@@ -73,7 +73,7 @@ code {
 }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.btn-primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-deep); border-color: var(--accent-deep); color: #fff; }
 .btn-secondary { background: transparent; border-color: var(--ink); color: var(--ink); }
 .btn-secondary:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
 .btn-ghost { background: transparent; border-color: var(--line); color: var(--ink); }
@@ -211,7 +211,7 @@ code {
 .topbar-right { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
 .user-email { color: var(--dark-muted); font-size: 0.85rem; }
 /* Light-on-dark button variants inside the topbar */
-.topbar .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.topbar .btn-primary { background: var(--accent-deep); border-color: var(--accent-deep); color: #fff; }
 .topbar .btn-primary:hover:not(:disabled) { background: var(--ink); border-color: var(--ink); }
 .topbar .btn-ghost { color: var(--dark-ink); border-color: rgba(244, 242, 238, 0.35); }
 .topbar .btn-ghost:hover:not(:disabled) { border-color: var(--dark-ink); }
@@ -597,3 +597,9 @@ button.stat-tile:hover { border-color: var(--ink); transform: translateY(-2px); 
   .tab-btn { white-space: nowrap; }
   .stat-num { font-size: 1.4rem; }
 }
+
+/* Case-study details group */
+.field-group { border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem 0.4rem; margin: 0.6rem 0 1.2rem; min-width: 0; }
+.field-group > legend { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 0 0.5rem; }
+.field-group code { font-size: 0.85em; text-transform: none; letter-spacing: 0; }
+#storyMeter { margin: -0.4rem 0 0.9rem; }
