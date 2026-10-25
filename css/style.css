@@ -620,6 +620,9 @@ body.page-leaving { opacity: 0; transition: opacity 0.35s var(--ease); }
 .page-links { display: flex; flex-wrap: wrap; gap: 0.4rem 1.6rem; padding: 0 var(--gutter); max-width: var(--max-w); margin: 0 auto; }
 .price-lead { font-family: var(--font-display); font-size: clamp(1.3rem, 2.8vw, 2.2rem); font-weight: 700; line-height: 1.2; max-width: 28ch; margin-bottom: 2rem; }
 .price-cta { margin-top: 2.4rem; }
+.currency-toggle { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2.4rem; }
+.currency-toggle[hidden] { display: none; }
+.currency-toggle + .packages { margin-top: 1.6rem; }
 .packages { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: clamp(1.5rem, 3vw, 3rem); margin-top: 3rem; }
 .packages[hidden] { display: none; }
 .package { border-top: 1px solid var(--line); padding-top: 1.4rem; }

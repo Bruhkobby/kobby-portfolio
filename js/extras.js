@@ -40,13 +40,40 @@
     }
 
     // ---- Pricing packages (services page) ----
+    // Cedis for visitors in Ghana, dollars for everyone else; they can switch.
+    // The browser's own time zone / language picks the default, nothing is sent anywhere.
     var pWrap = document.getElementById("pricing-packages");
-    var packs = (window.PRICING || []).filter(function (p) { return p && p.name && p.from; });
+    var packs = (window.PRICING || []).filter(function (p) { return p && p.name && (p.from || p.usd); });
     if (pWrap) {
+      var hasGhs = packs.some(function (p) { return p.from; });
+      var hasUsd = packs.some(function (p) { return p.usd; });
+      var cur = pickCurrency(hasGhs, hasUsd);
+
+      var toggle = document.getElementById("currency-toggle");
+      if (!toggle) {
+        toggle = document.createElement("div");
+        toggle.id = "currency-toggle";
+        toggle.className = "currency-toggle";
+        toggle.setAttribute("role", "group");
+        toggle.setAttribute("aria-label", "Show prices in");
+        pWrap.parentNode.insertBefore(toggle, pWrap);
+        toggle.addEventListener("click", function (e) {
+          var b = e.target.closest("button[data-cur]");
+          if (!b) return;
+          try { localStorage.setItem("kobbyCurrency", b.getAttribute("data-cur")); } catch (err) {}
+          render();
+        });
+      }
+      toggle.hidden = !(hasGhs && hasUsd);
+      toggle.innerHTML = [["GHS", "Cedis (GH₵)"], ["USD", "US dollars ($)"]].map(function (c) {
+        return '<button type="button" class="filter-btn' + (cur === c[0] ? " active" : "") + '" data-cur="' + c[0] + '" aria-pressed="' + (cur === c[0]) + '">' + c[1] + "</button>";
+      }).join("");
+
       pWrap.innerHTML = packs.map(function (p) {
+        var price = cur === "USD" ? (p.usd || p.from) : (p.from || p.usd);
         return '<div class="package" data-reveal>' +
           '<h3 class="package-name">' + esc(p.name) + "</h3>" +
-          '<p class="package-price"><span>' + esc(p.note || "From") + "</span> " + esc(p.from) + "</p>" +
+          '<p class="package-price"><span>' + esc(p.note || "From") + "</span> " + esc(price) + "</p>" +
           (p.includes && p.includes.length ? "<ul>" + p.includes.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("") + "</ul>" : "") +
         "</div>";
       }).join("");
@@ -54,6 +81,17 @@
     }
 
     document.dispatchEvent(new CustomEvent("content:updated"));
+  }
+
+  function pickCurrency(hasGhs, hasUsd) {
+    if (!hasUsd) return "GHS";
+    if (!hasGhs) return "USD";
+    var saved = null;
+    try { saved = localStorage.getItem("kobbyCurrency"); } catch (e) {}
+    if (saved === "GHS" || saved === "USD") return saved;
+    var tz = "", lang = (navigator.language || "").toLowerCase();
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+    return (tz === "Africa/Accra" || /-gh$/.test(lang)) ? "GHS" : "USD";
   }
 
   window.KobbyExtras = { render: render };

@@ -54,13 +54,13 @@
     var jobs = [
       needTestimonials ? api("testimonials?select=quote,name,role&order=sort_order.asc,created_at.asc") : Promise.resolve(null),
       needTestimonials ? api("clients?select=name,logo_url&order=sort_order.asc,created_at.asc") : Promise.resolve(null),
-      needPackages ? api("packages?select=name,price_from,price_note,includes&order=sort_order.asc,created_at.asc") : Promise.resolve(null)
+      needPackages ? api("packages?select=*&order=sort_order.asc,created_at.asc") : Promise.resolve(null)
     ];
     Promise.all(jobs).then(function (r) {
       var content = {};
       if (r[0]) content.testimonials = r[0].map(function (t) { return { quote: t.quote, name: t.name, role: t.role || "" }; });
       if (r[1]) content.clients = r[1].map(function (c) { return { name: c.name, logo: c.logo_url || "" }; });
-      if (r[2]) content.packages = r[2].map(function (p) { return { name: p.name, from: p.price_from, note: p.price_note || "", includes: p.includes || [] }; });
+      if (r[2]) content.packages = r[2].map(function (p) { return { name: p.name, from: p.price_from, usd: p.price_usd || "", note: p.price_note || "", includes: p.includes || [] }; });
       var old = readCache().content || {};
       for (var k in content) old[k] = content[k];
       writeCache({ content: old });

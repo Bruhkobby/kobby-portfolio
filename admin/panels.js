@@ -330,14 +330,15 @@
         empty: "No packages yet, so the Services page says every project is quoted individually.",
         fields: [
           { key: "name", label: "Package name", required: true, max: 120, placeholder: "Logo & brand identity" },
-          { key: "price_from", label: "Price", required: true, max: 60, placeholder: "GHS 1,500" },
+          { key: "price_from", label: "Price in cedis (type it exactly as visitors should see it)", required: true, max: 60, placeholder: "GH₵1,500" },
+          { key: "price_usd", label: "Price in US dollars (optional, for clients abroad)", max: 60, placeholder: "$120" },
           { key: "price_note", label: "Small label before the price (optional)", max: 60, placeholder: "Starting from" },
           { key: "includes", label: "What's included (one item per line)", type: "lines", rows: 5, max: 800 }
         ],
-        toForm: function (r) { return { name: r.name, price_from: r.price_from, price_note: r.price_note, includes: (r.includes || []).join("\n") }; },
-        summary: function (r) { return { title: r.name, sub: (r.price_note ? r.price_note + " " : "") + r.price_from + " · " + (r.includes || []).length + " items" }; },
+        toForm: function (r) { return { name: r.name, price_from: r.price_from, price_usd: r.price_usd || "", price_note: r.price_note, includes: (r.includes || []).join("\n") }; },
+        summary: function (r) { return { title: r.name, sub: (r.price_note ? r.price_note + " " : "") + r.price_from + (r.price_usd ? " / " + r.price_usd : "") + " · " + (r.includes || []).length + " items" }; },
         toDB: function (get) {
-          return { name: get("name"), price_from: get("price_from"), price_note: get("price_note") || null,
+          return { name: get("name"), price_from: get("price_from"), price_usd: get("price_usd") || null, price_note: get("price_note") || null,
             includes: get("includes").split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean) };
         }
       })
