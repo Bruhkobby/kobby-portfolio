@@ -39,8 +39,9 @@
 
   .section { padding-top: 3.5rem; padding-bottom: 3.5rem; }
 
-  /* Hero fills the phone screen with deliberate type scale */
-  .hero { padding-bottom: 4.5rem; }
+  /* Hero: a compact banner, so the first project is already peeking in on a phone
+     (it used to fill the whole screen with an empty top half) */
+  .hero { min-height: min(62svh, 32rem); padding-top: 6.5rem; padding-bottom: 3.5rem; }
   .hero-scroll { display: none; }
   .hero-statement { margin-top: 2rem; }
 
@@ -115,4 +116,23 @@
   .whatsapp-fab { padding: 0.95rem; }
   .whatsapp-fab span { display: none; }
   .case-hero { padding-top: 8rem; }
+}
+
+
+/* ---------- Phones held sideways (short screens) ---------- */
+@media (max-height: 520px) and (orientation: landscape) {
+  .hero { min-height: 0; padding-top: 5.5rem; padding-bottom: 2.5rem; }
+  .hero-line { font-size: clamp(2.4rem, 8vw, 4.5rem); }
+  .hero-line-sub { font-size: clamp(1.1rem, 3.2vw, 2rem); }
+  .hero-kicker { margin-bottom: 0.8rem; }
+  .hero-statement { margin-top: 1rem; }
+  .page-hero, .case-hero { padding-top: 6rem; }
+}
+
+/* ---------- Small labels: keep them readable on a phone ---------- */
+@media (max-width: 560px) {
+  .card-badge, .case-pager-kicker, .case-meta-label, em.optional, .filter-btn, .filter-count,
+  .contact-label, .hero-kicker, .section-label, .footer-kicker, .case-section-label, .col-label,
+  .section-link, .case-back, .availability, .post-date, .post-tag, .footer-col h3, .service-num,
+  .division-count, .division-links a { font-size: 0.75rem; }
 }
