@@ -1,6 +1,14 @@
 {
   "posts": [
     {
+      "slug": "12-principles-of-animation-for-motion-designers",
+      "title": "The 12 Principles of Animation, Explained for Motion Designers",
+      "date": "2026-10-26",
+      "category": "Motion",
+      "status": "live",
+      "source": "file"
+    },
+    {
       "slug": "logo-file-formats-explained",
       "title": "Logo File Formats Explained: PNG, JPG, SVG, PDF and When to Use Each",
       "date": "2026-10-23",
@@ -22,14 +30,6 @@
       "date": "2026-10-17",
       "category": "Branding",
       "status": "live",
-      "source": "file"
-    },
-    {
-      "slug": "12-principles-of-animation-for-motion-designers",
-      "title": "The 12 Principles of Animation, Explained for Motion Designers",
-      "date": "2026-10-26",
-      "category": "Motion",
-      "status": "scheduled",
       "source": "file"
     },
     {
