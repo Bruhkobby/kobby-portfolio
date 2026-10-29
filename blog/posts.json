@@ -1,6 +1,14 @@
 {
   "posts": [
     {
+      "slug": "how-to-brief-a-designer",
+      "title": "How to Brief a Designer: 10 Things to Include for Better Results",
+      "date": "2026-10-29",
+      "category": "Working Together",
+      "status": "live",
+      "source": "file"
+    },
+    {
       "slug": "12-principles-of-animation-for-motion-designers",
       "title": "The 12 Principles of Animation, Explained for Motion Designers",
       "date": "2026-10-26",
@@ -30,14 +38,6 @@
       "date": "2026-10-17",
       "category": "Branding",
       "status": "live",
-      "source": "file"
-    },
-    {
-      "slug": "how-to-brief-a-designer",
-      "title": "How to Brief a Designer: 10 Things to Include for Better Results",
-      "date": "2026-10-29",
-      "category": "Working Together",
-      "status": "scheduled",
       "source": "file"
     },
     {
