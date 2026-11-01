@@ -38,9 +38,15 @@
   <!-- blog:start -->
   <url>
     <loc>https://bruhkobby.github.io/kobby-portfolio/blog.html</loc>
-    <lastmod>2026-10-29</lastmod>
+    <lastmod>2026-11-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bruhkobby.github.io/kobby-portfolio/blog/six-video-cuts-every-beginner-should-know.html</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://bruhkobby.github.io/kobby-portfolio/blog/how-to-brief-a-designer.html</loc>
