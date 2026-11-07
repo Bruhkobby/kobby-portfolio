@@ -182,3 +182,18 @@
   .menu-toggle.open span:nth-child(2) { transform: rotate(-45deg); }
   .menu-toggle.open::after { opacity: 0; }
 }
+
+/* ---------- Nothing may ever make the page wider than the screen ----------
+   If one word or box is a little too wide, phones zoom the whole page out to fit it: the
+   header (which is fixed) then fills the screen while the page itself looks narrow and cut.
+   So: big headings shrink a little on phones, long words wrap instead of sticking out, and
+   the page itself refuses to be wider than the screen. */
+h1, h2, h3, .hero-line, .page-title, .footer-title, .case-title, .qv-title,
+.contact-row, .contact-row *, .case-section-text, .prose, .post-aside * { overflow-wrap: anywhere; }
+.post-layout > *, .case-section > *, .contact-row > * { min-width: 0; }
+@media (max-width: 560px) {
+  .page-title { font-size: clamp(2.1rem, 11vw, 3rem); }
+}
+@supports (overflow: clip) {
+  html, body { overflow-x: clip; max-width: 100%; }
+}
