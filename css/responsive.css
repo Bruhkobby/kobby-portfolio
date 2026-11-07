@@ -19,7 +19,8 @@
   .case-section { grid-template-columns: 1fr; gap: 1rem; }
   .related-grid { grid-template-columns: 1fr 1fr; }
   .post-layout { grid-template-columns: 1fr; gap: 1.6rem; }
-  .post-aside { position: static; grid-auto-flow: column; justify-content: start; gap: 2.4rem; }
+  .post-layout > * { min-width: 0; }
+  .post-aside { position: static; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 1rem 2.4rem; }
   .case-gallery .frame.tall { max-width: 80%; }
 
   .about-intro { grid-template-columns: 1fr; gap: 2rem; }
@@ -160,16 +161,24 @@
   .menu-toggle {
     width: 44px; height: 44px;
     padding: 0;
-    margin-right: -9px;                 /* lines line up with the page margin */
+    margin-right: 0;
     align-items: center;
     justify-content: center;
     gap: 6px;
+    color: #fff;
+    /* A visible button: bright lines inside a lightly outlined box, so it is easy to spot
+       even when the page behind the bar is busy or the screen is dim. */
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 10px;
     -webkit-tap-highlight-color: transparent;
   }
+  .menu-toggle:active { background: rgba(255, 255, 255, 0.26); }
+  .menu-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .menu-toggle span,
-  .menu-toggle::after { display: block; width: 26px; height: 2px; background: currentColor; border-radius: 1px; }
+  .menu-toggle::after { display: block; width: 22px; height: 3px; background: #fff; border-radius: 2px; }
   .menu-toggle::after { content: ""; transition: opacity 0.3s; }
-  .menu-toggle.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .menu-toggle.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
   .menu-toggle.open span:nth-child(2) { transform: rotate(-45deg); }
   .menu-toggle.open::after { opacity: 0; }
 }
