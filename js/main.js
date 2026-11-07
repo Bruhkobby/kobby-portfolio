@@ -51,14 +51,18 @@
     var closeMenu = function () {
       menu.classList.remove("open");
       toggle.classList.remove("open");
+      document.body.classList.remove("menu-open");
       toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-label", "Open menu");
       menu.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
     };
     toggle.addEventListener("click", function () {
       var open = menu.classList.toggle("open");
       toggle.classList.toggle("open", open);
+      document.body.classList.toggle("menu-open", open);
       toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
       menu.setAttribute("aria-hidden", String(!open));
       document.body.style.overflow = open ? "hidden" : "";
     });

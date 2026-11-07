@@ -136,3 +136,40 @@
   .section-link, .case-back, .availability, .post-date, .post-tag, .footer-col h3, .service-num,
   .division-count, .division-links a { font-size: 0.75rem; }
 }
+
+
+/* ---------- Phone header + hamburger ----------
+   A solid bar, so the logo and the menu button are always readable. (The old
+   see-through "difference" effect disappeared in some phone browsers, such as the
+   ones inside Instagram and TikTok, and left page text showing behind the logo.) */
+@media (max-width: 768px) {
+  .site-header {
+    mix-blend-mode: normal;
+    z-index: 240;                       /* above the open menu (200), below pop-ups (250+) */
+    background: rgba(14, 14, 12, 0.94);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: var(--dark-ink);
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+    transition: background 0.3s;
+  }
+  body.menu-open .site-header { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+  /* Three-line hamburger with a 44px tap area */
+  .menu-toggle {
+    width: 44px; height: 44px;
+    padding: 0;
+    margin-right: -9px;                 /* lines line up with the page margin */
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .menu-toggle span,
+  .menu-toggle::after { display: block; width: 26px; height: 2px; background: currentColor; border-radius: 1px; }
+  .menu-toggle::after { content: ""; transition: opacity 0.3s; }
+  .menu-toggle.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .menu-toggle.open span:nth-child(2) { transform: rotate(-45deg); }
+  .menu-toggle.open::after { opacity: 0; }
+}
