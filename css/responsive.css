@@ -188,11 +188,12 @@
    header (which is fixed) then fills the screen while the page itself looks narrow and cut.
    So: big headings shrink a little on phones, long words wrap instead of sticking out, and
    the page itself refuses to be wider than the screen. */
-h1, h2, h3, .hero-line, .page-title, .footer-title, .case-title, .qv-title,
-.contact-row, .contact-row *, .case-section-text, .prose, .post-aside * { overflow-wrap: anywhere; }
+h2, h3, .contact-row, .contact-row *, .case-section-text, .prose, .post-aside * { overflow-wrap: anywhere; }
+/* Big titles are never broken in the middle of a word: main.js shrinks them to fit instead. */
+h1, .hero-line, .page-title, .footer-title, .case-title, .qv-title { overflow-wrap: normal; word-break: normal; hyphens: none; }
 .post-layout > *, .case-section > *, .contact-row > * { min-width: 0; }
 @media (max-width: 560px) {
-  .page-title { font-size: clamp(2.1rem, 11vw, 3rem); }
+  .page-title { font-size: clamp(2rem, 9.5vw, 3rem); }
 }
 @supports (overflow: clip) {
   html, body { overflow-x: clip; max-width: 100%; }

@@ -170,3 +170,65 @@
     setTimeout(function () { location.href = href; }, 320);
   });
 })();
+
+/* ---------- Big titles always fit the screen, whole words, never broken ----------
+   Wide headline fonts can make a word like "PORTFOLIO" a little wider than a phone screen.
+   Instead of breaking the word in the middle, measure the widest word in each big title and
+   shrink the title just enough for it to fit. It grows back on bigger screens, and re-checks
+   when the web font finishes loading, the screen turns, or a title is filled in later. */
+(function () {
+  var SELECTOR = ".page-title, .hero-line, .footer-title, .case-title, .qv-title";
+  var MIN_SCALE = 0.4;
+
+  function widestWord(el) {
+    var max = 0;
+    var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    var node;
+    var range = document.createRange();
+    while ((node = walker.nextNode())) {
+      var re = /\S+/g, m, text = node.nodeValue;
+      while ((m = re.exec(text))) {
+        range.setStart(node, m.index);
+        range.setEnd(node, m.index + m[0].length);
+        var w = range.getBoundingClientRect().width;
+        if (w > max) max = w;
+      }
+    }
+    return max;
+  }
+
+  function fit(el) {
+    el.style.fontSize = "";
+    var cs = getComputedStyle(el);
+    if (cs.display === "none") return;
+    var avail = el.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+    if (avail <= 0) return;
+    var need = widestWord(el);
+    if (need > avail) {
+      var size = parseFloat(cs.fontSize);
+      var next = Math.max(size * MIN_SCALE, Math.floor(size * (avail / need) * 0.97 * 10) / 10);
+      el.style.fontSize = next + "px";
+    }
+  }
+
+  function fitAll() {
+    var list = document.querySelectorAll(SELECTOR);
+    for (var i = 0; i < list.length; i++) fit(list[i]);
+  }
+
+  var pending = false;
+  function schedule() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function () { pending = false; fitAll(); });
+  }
+
+  fitAll();
+  window.addEventListener("resize", schedule);
+  window.addEventListener("orientationchange", schedule);
+  window.addEventListener("load", schedule);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+  if (window.MutationObserver) {
+    new MutationObserver(function () { schedule(); }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+})();
