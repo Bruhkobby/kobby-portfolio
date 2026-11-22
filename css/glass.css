@@ -1,5 +1,5 @@
 /* ============================================================
-   KOBBY — Frosted-glass look ("glassmorphism")
+   KOBBY — Modern look layer: frosted glass, dark mode, page transitions, bento cards
    Loaded after style.css and responsive.css on the public pages only.
    To switch the whole look off, remove the glass.css <link> from the pages.
 
@@ -20,6 +20,15 @@
   --glass-blur: 18px;
   --glass-r: 20px;
   --muted: #4d4942;   /* a touch darker than before, so grey text stays easy to read over the colour glow */
+  --label: #3f3b35;
+  --field-bg: rgba(255, 255, 255, 0.5);
+  --field-bg-focus: rgba(255, 255, 255, 0.8);
+  --field-brd: rgba(19, 19, 17, 0.16);
+  --ph: rgba(77, 73, 66, 0.72);
+  --outline-brd: rgba(19, 19, 17, 0.28);
+  --qv-bg: rgba(244, 242, 238, 0.86);
+  --err: #a33d2a;
+  color-scheme: light;
 }
 @media (max-width: 768px) { :root { --glass-blur: 12px; --glass-r: 18px; } }
 
@@ -29,10 +38,10 @@ body::before {
   content: "";
   position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
-    radial-gradient(46vmax 46vmax at 6% 10%, rgba(201, 111, 58, 0.40), transparent 62%),
-    radial-gradient(40vmax 40vmax at 96% 34%, rgba(240, 168, 132, 0.46), transparent 62%),
-    radial-gradient(48vmax 48vmax at 62% 98%, rgba(150, 118, 210, 0.30), transparent 62%),
-    radial-gradient(34vmax 34vmax at 30% 55%, rgba(236, 120, 150, 0.14), transparent 62%);
+    radial-gradient(46vmax 46vmax at 6% 10%, rgba(201, 111, 58, var(--glow-a, 0.40)), transparent 62%),
+    radial-gradient(40vmax 40vmax at 96% 34%, rgba(240, 168, 132, var(--glow-b, 0.46)), transparent 62%),
+    radial-gradient(48vmax 48vmax at 62% 98%, rgba(150, 118, 210, var(--glow-c, 0.30)), transparent 62%),
+    radial-gradient(34vmax 34vmax at 30% 55%, rgba(236, 120, 150, var(--glow-d, 0.14)), transparent 62%);
 }
 
 /* ---------- Header: floating smoked-glass bar ---------- */
@@ -86,8 +95,8 @@ body.menu-open .site-header {
 }
 .hero .availability { color: var(--dark-ink); }
 .hero .hero-statement { color: rgba(244, 242, 238, 0.82); }   /* a little brighter on the dark hero */
-.section-label { color: #3f3b35; }                              /* labels sit on the glow: slightly darker */
-.filter-btn:not(.active):not([aria-pressed="true"]) { color: #3f3b35; }
+.section-label { color: var(--label); }                              /* labels sit on the glow: slightly darker */
+.filter-btn:not(.active):not([aria-pressed="true"]) { color: var(--label); }
 .site-header .site-nav a { opacity: 0.92; }
 
 /* ---------- Glass cards ---------- */
@@ -125,7 +134,7 @@ body.menu-open .site-header {
 /* ---------- Buttons ---------- */
 .btn-outline {
   background: var(--glass-bg);
-  border-color: rgba(19, 19, 17, 0.28);
+  border-color: var(--outline-brd);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
   backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
   box-shadow: var(--glass-shadow);
@@ -146,21 +155,22 @@ body.menu-open .site-header {
 .contact-form { padding: clamp(1.3rem, 3vw, 2.4rem); }
 .form-field input,
 .form-field textarea {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(19, 19, 17, 0.16);
+  background: var(--field-bg);
+  border: 1px solid var(--field-brd);
   border-radius: 12px;
   padding: 0.8rem 1rem;
 }
 .form-field input:focus,
-.form-field textarea:focus { border-color: var(--ink); background: rgba(255, 255, 255, 0.8); box-shadow: 0 0 0 3px rgba(201, 111, 58, 0.28); }
+.form-field textarea:focus { border-color: var(--ink); background: var(--field-bg-focus); box-shadow: 0 0 0 3px rgba(201, 111, 58, 0.28); }
 .form-field input::placeholder,
-.form-field textarea::placeholder { color: rgba(77, 73, 66, 0.72); }
+.form-field textarea::placeholder { color: var(--ph); }
 .form-field input[aria-invalid="true"],
-.form-field textarea[aria-invalid="true"] { border-color: #a33d2a; }
+.form-field textarea[aria-invalid="true"] { border-color: var(--err); }
+.form-status.error { color: var(--err); }
 
 /* ---------- Pop-ups ---------- */
 .quickview {
-  background: rgba(244, 242, 238, 0.86);
+  background: var(--qv-bg);
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 1.3)) saturate(1.4);
   backdrop-filter: blur(calc(var(--glass-blur) * 1.3)) saturate(1.4);
 }
@@ -200,6 +210,7 @@ body.menu-open .site-header {
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   :root { --glass-bg: rgba(255, 255, 255, 0.95); --glass-bg-strong: #fff; --glass-dark-bg: rgb(14, 14, 12); }
+  html[data-theme="dark"] { --glass-bg: rgb(30, 29, 26); --glass-bg-strong: rgb(44, 42, 38); --glass-dark-bg: rgb(14, 14, 12); }
   .mobile-menu { background: rgb(14, 14, 12); }
   .quickview { background: var(--bg); }
   body::before { opacity: 0.4; }
@@ -211,4 +222,152 @@ body.menu-open .site-header {
 @media print {
   body::before, .hero::before, .site-footer::before { display: none; }
   .site-header { position: static; }
+}
+
+
+/* ============================================================
+   DARK MODE
+   Switched by the moon / sun button in the header (js/theme.js), which follows the
+   visitor's device setting until they choose for themselves. The hero and footer are
+   dark in both modes, so only the colour variables change here.
+   ============================================================ */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121210;
+  --bg-soft: #1c1b18;
+  --ink: #f1eee8;
+  --muted: #b6b1a7;
+  --line: rgba(244, 242, 238, 0.16);
+  --dark: #0a0a09;
+  --label: #d9d4ca;
+  --glass-bg: rgba(40, 38, 34, 0.58);
+  --glass-bg-strong: rgba(58, 55, 50, 0.82);
+  --glass-brd: rgba(255, 255, 255, 0.13);
+  --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --glass-dark-bg: rgba(32, 31, 28, 0.82);
+  --glass-dark-brd: rgba(255, 255, 255, 0.2);
+  --field-bg: rgba(255, 255, 255, 0.07);
+  --field-bg-focus: rgba(255, 255, 255, 0.13);
+  --field-brd: rgba(255, 255, 255, 0.22);
+  --ph: rgba(182, 177, 167, 0.78);
+  --outline-brd: rgba(244, 242, 238, 0.42);
+  --qv-bg: rgba(18, 18, 16, 0.9);
+  --err: #ff8f78;
+  --glow-a: 0.2; --glow-b: 0.1; --glow-c: 0.2; --glow-d: 0.08;
+}
+html[data-theme="dark"] .package:hover,
+html[data-theme="dark"] .testimonial:hover { box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12); }
+html[data-theme="dark"] .form-field input[aria-invalid="true"],
+html[data-theme="dark"] .form-field textarea[aria-invalid="true"] { border-color: #e0705a; }
+html[data-theme="dark"] .section-label { color: var(--label); }
+
+/* ---------- Header tools: theme button next to the menu button ---------- */
+.header-tools { display: flex; align-items: center; gap: 0.6rem; }
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.theme-toggle:hover { background: rgba(255, 255, 255, 0.22); }
+.theme-toggle:active { transform: scale(0.94); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.theme-toggle .i-sun { display: none; }
+html[data-theme="dark"] .theme-toggle .i-sun { display: block; }
+html[data-theme="dark"] .theme-toggle .i-moon { display: none; }
+@media (max-width: 768px) { .theme-toggle { width: 44px; height: 44px; } .header-tools { gap: 0.5rem; } }
+
+/* ============================================================
+   SMOOTH PAGE TRANSITIONS
+   Browsers that support it fade between pages natively (no waiting, no flash).
+   Others keep the older fade done in main.js.
+   ============================================================ */
+@view-transition { navigation: auto; }
+html.vt .page { animation: none; }
+::view-transition-old(root) { animation: vtOut 0.22s ease both; }
+::view-transition-new(root) { animation: vtIn 0.38s var(--ease) both; }
+@keyframes vtOut { to { opacity: 0; } }
+@keyframes vtIn { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* ============================================================
+   BENTO CARDS: Services and About
+   Mixed-size glass tiles. Pure CSS, no extra requests.
+   ============================================================ */
+.services-list { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(0.8rem, 1.6vw, 1.2rem); }
+.service-item,
+.about-col,
+.about-me-text {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-brd);
+  border-radius: var(--glass-r);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5);
+}
+.service-item {
+  grid-column: span 4;
+  flex-direction: column; justify-content: space-between;
+  gap: clamp(1.4rem, 3.5vw, 2.6rem);
+  min-height: 12.5rem;
+  padding: clamp(1.2rem, 2.4vw, 2rem);
+  transition: background 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.service-item:first-child { border-top: 1px solid var(--glass-brd); }
+.service-item:hover { background: var(--glass-bg-strong); border-color: rgba(201, 111, 58, 0.55); }
+.service-item-name { font-size: clamp(1.3rem, 2.5vw, 2rem); overflow-wrap: normal; }
+.service-item:nth-child(1) { grid-column: span 7; background: var(--glass-dark-bg); border-color: var(--glass-dark-brd); color: var(--dark-ink); min-height: 15rem; }
+.service-item:nth-child(1) .service-num,
+.service-item:nth-child(1) .service-item-desc { color: rgba(244, 242, 238, 0.82); }
+.service-item:nth-child(1):hover { background: rgba(14, 14, 12, 0.9); }
+.service-item:nth-child(2) { grid-column: span 5; }
+.service-item:nth-child(6) { grid-column: span 5; }
+.service-item:nth-child(7) { grid-column: span 7; }
+.service-item:nth-child(8) { grid-column: span 12; min-height: 9rem; }
+@media (max-width: 1024px) {
+  .service-item, .service-item:nth-child(n) { grid-column: span 6; }
+  .service-item:nth-child(1), .service-item:nth-child(8) { grid-column: span 12; }
+}
+@media (max-width: 640px) {
+  .service-item, .service-item:nth-child(n) { grid-column: span 12; min-height: 0; gap: 1rem; }
+}
+
+/* About: photo + details */
+@media (min-width: 1025px) {
+  .about-me { align-items: stretch; gap: clamp(1rem, 2vw, 1.6rem); }
+  .about-photo { max-width: none; aspect-ratio: auto; min-height: 24rem; position: relative; }
+  .about-photo img { position: absolute; inset: 0; }
+}
+.about-photo { border-radius: var(--glass-r); }
+.about-me-text { padding: clamp(1.3rem, 3vw, 2.6rem); align-self: stretch; }
+.about-me-text .case-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; }
+.about-me-text .case-meta-item { padding: 0.85rem 1rem; border-radius: 14px; background: var(--glass-bg-strong); border: 1px solid var(--glass-brd); }
+.case-meta-value { overflow-wrap: anywhere; }
+@media (max-width: 420px) { .about-me-text .case-meta { grid-template-columns: 1fr; } }
+
+/* About: skills, software, services */
+.about-cols { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(0.8rem, 1.6vw, 1.2rem); }
+.about-col { grid-column: span 4; padding: clamp(1.2rem, 2.4vw, 2rem); }
+.about-col:nth-child(1) { grid-column: span 7; }
+.about-col:nth-child(2) { grid-column: span 5; }
+.about-col:nth-child(3) { grid-column: span 12; }
+.about-col:nth-child(1) .skill-list { columns: 2; column-gap: 2.2rem; }
+.about-col:nth-child(1) .skill-list li { break-inside: avoid; }
+.about-col:nth-child(2) .skill-list,
+.about-col:nth-child(3) .skill-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.about-col:nth-child(2) .skill-list li,
+.about-col:nth-child(3) .skill-list li {
+  padding: 0.45rem 0.95rem; font-size: 0.88rem;
+  border: 1px solid var(--glass-brd); border-radius: 999px; background: var(--glass-bg-strong);
+}
+@media (max-width: 768px) {
+  .about-col, .about-col:nth-child(n) { grid-column: span 12; }
+}
+@media (max-width: 560px) {
+  .about-col:nth-child(1) .skill-list { columns: 1; }
 }

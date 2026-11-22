@@ -157,6 +157,9 @@
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;
 
+    // Browsers that fade between pages natively (the "vt" flag, set in theme.js) do it themselves.
+    if (document.documentElement.classList.contains("vt")) return;
+
     // Same page → let the browser handle it.
     var targetPath = href.split("#")[0];
     var currentPath = location.pathname.split("/").pop() || "index.html";
