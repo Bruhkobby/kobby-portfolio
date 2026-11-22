@@ -198,3 +198,9 @@ h1, .hero-line, .page-title, .footer-title, .case-title, .qv-title { overflow-wr
 @supports (overflow: clip) {
   html, body { overflow-x: clip; max-width: 100%; }
 }
+
+/* Menu footer links (email, Instagram, TikTok): big enough to tap with a thumb */
+.mobile-menu-footer a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* Lightbox close button: a proper 44px tap target */
+.lightbox-close { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; top: 0.8rem; right: 0.8rem; }
