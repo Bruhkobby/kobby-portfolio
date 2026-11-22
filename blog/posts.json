@@ -47,6 +47,102 @@
       "category": "Branding",
       "status": "live",
       "source": "file"
+    },
+    {
+      "slug": "how-to-design-a-flyer-people-read",
+      "title": "How to Design a Flyer That People Actually Read",
+      "date": "2026-11-23",
+      "category": "Design",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "pairing-fonts-without-overthinking",
+      "title": "Pairing Fonts Without Overthinking It",
+      "date": "2026-11-26",
+      "category": "Design",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "what-colours-say-about-your-brand",
+      "title": "What Colours Say About Your Brand (and How to Choose Yours)",
+      "date": "2026-11-29",
+      "category": "Branding",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "how-many-design-revisions-are-fair",
+      "title": "How Many Design Revisions Are Fair?",
+      "date": "2026-12-02",
+      "category": "Working Together",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "social-media-image-sizes-and-safe-zones",
+      "title": "Social Media Image Sizes and Safe Zones Made Simple",
+      "date": "2026-12-05",
+      "category": "Social Media",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "rgb-vs-cmyk-screen-vs-print",
+      "title": "RGB vs CMYK, Why Your Design Looks Different in Print",
+      "date": "2026-12-08",
+      "category": "Print",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "pacing-and-rhythm-in-video-editing",
+      "title": "Pacing and Rhythm in Video Editing, Keeping Viewers Watching",
+      "date": "2026-12-11",
+      "category": "Video",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "logo-design-mistakes-to-avoid",
+      "title": "7 Logo Design Mistakes to Avoid",
+      "date": "2026-12-14",
+      "category": "Branding",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "how-to-give-design-feedback",
+      "title": "How to Give Design Feedback That Gets Better Results",
+      "date": "2026-12-17",
+      "category": "Working Together",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "typographic-hierarchy-make-layouts-easy-to-scan",
+      "title": "Typographic Hierarchy, Make Your Layouts Easy to Scan",
+      "date": "2026-12-20",
+      "category": "Design",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "preparing-files-for-print-bleed-margins-resolution",
+      "title": "Preparing Files for Print, Bleed, Margins and Resolution",
+      "date": "2026-12-23",
+      "category": "Print",
+      "status": "scheduled",
+      "source": "file"
+    },
+    {
+      "slug": "why-audio-is-half-of-your-video",
+      "title": "Why Audio Is Half of Your Video",
+      "date": "2026-12-26",
+      "category": "Video",
+      "status": "scheduled",
+      "source": "file"
     }
   ]
 }
