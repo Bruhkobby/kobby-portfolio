@@ -1,6 +1,14 @@
 {
   "posts": [
     {
+      "slug": "how-to-design-a-flyer-people-read",
+      "title": "How to Design a Flyer That People Actually Read",
+      "date": "2026-11-23",
+      "category": "Design",
+      "status": "live",
+      "source": "file"
+    },
+    {
       "slug": "six-video-cuts-every-beginner-should-know",
       "title": "6 Video Cuts Every Beginner Editor Should Know",
       "date": "2026-11-01",
@@ -46,14 +54,6 @@
       "date": "2026-10-17",
       "category": "Branding",
       "status": "live",
-      "source": "file"
-    },
-    {
-      "slug": "how-to-design-a-flyer-people-read",
-      "title": "How to Design a Flyer That People Actually Read",
-      "date": "2026-11-23",
-      "category": "Design",
-      "status": "scheduled",
       "source": "file"
     },
     {
