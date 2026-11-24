@@ -371,3 +371,15 @@ html.vt .page { animation: none; }
 @media (max-width: 560px) {
   .about-col:nth-child(1) .skill-list { columns: 1; }
 }
+
+/* ---------- Portfolio tiles: even glass frames ---------- */
+.work-grid .project-card .card-media,
+.work-preview .project-card .card-media,
+.related-grid .project-card .card-media {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-brd);
+  box-shadow: var(--glass-shadow);
+  transition: box-shadow 0.45s var(--ease), border-color 0.45s var(--ease);
+}
+.project-card:hover .card-media { border-color: rgba(201, 111, 58, 0.55); }
+.qv-close, .case-close { -webkit-backdrop-filter: none; backdrop-filter: none; }

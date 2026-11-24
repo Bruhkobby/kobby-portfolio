@@ -7,14 +7,7 @@
 /* ---------- Tablet & small laptop ---------- */
 @media (max-width: 1024px) {
 
-  .work-preview .project-card:nth-child(1) { grid-column: 1 / span 8; }
-  .work-preview .project-card:nth-child(2) { grid-column: 8 / span 5; margin-top: 4rem; }
-  .work-preview .project-card:nth-child(3) { grid-column: 2 / span 7; }
-
-  .work-grid .project-card.c-0 { grid-column: 1 / span 7; }
-  .work-grid .project-card.c-1 { grid-column: 8 / span 5; }
-  .work-grid .project-card.c-2 { grid-column: 1 / span 6; }
-  .work-grid .project-card.c-3 { grid-column: 7 / span 6; }
+  .work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .case-section { grid-template-columns: 1fr; gap: 1rem; }
   .related-grid { grid-template-columns: 1fr 1fr; }
@@ -55,14 +48,9 @@
     margin-top: 0;
   }
 
-  .work-grid { grid-template-columns: 1fr; gap: 2.6rem; }
-  .work-grid .project-card.c-0,
-  .work-grid .project-card.c-1,
-  .work-grid .project-card.c-2,
-  .work-grid .project-card.c-3 {
-    grid-column: 1 / -1;
-    margin-top: 0;
-  }
+  /* Two even columns on phones: a neat gallery, and the page stays short */
+  .work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.6rem 0.9rem; }
+  .work-grid .card-title { font-size: 0.82rem; overflow-wrap: anywhere; }
 
   .filter-bar { gap: 0.3rem 1.1rem; margin-bottom: 2.4rem; }
   .filter-btn { font-size: 0.66rem; letter-spacing: 0.14em; }

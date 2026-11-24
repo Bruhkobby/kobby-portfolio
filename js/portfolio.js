@@ -544,6 +544,18 @@
 
       setupLightbox(wrap);
 
+      // A clear way out: a Close button that stays on screen, one at the very end, and the Esc key.
+      wrap.insertAdjacentHTML("beforeend", '<div class="case-close-bottom"><a class="btn-outline" href="portfolio.html">Close project ✕</a></div>');
+      if (!document.querySelector(".case-close")) {
+        document.body.insertAdjacentHTML("beforeend",
+          '<a class="case-close" href="portfolio.html" aria-label="Close this project and go back to the portfolio">Close ✕</a>');
+        document.addEventListener("keydown", function (e) {
+          if (e.key !== "Escape") return;
+          if (document.querySelector(".lightbox.open") || document.body.classList.contains("menu-open")) return;
+          window.location.href = "portfolio.html";
+        }, true); // capture phase: runs before the image viewer closes itself
+      }
+
       document.dispatchEvent(new CustomEvent("content:updated"));
       window.scrollTo(0, 0);
     }).catch(function () {
@@ -613,7 +625,8 @@
       '<div class="qv-nav">' +
         '<button class="qv-step" type="button" data-step="-1"></button>' +
         '<button class="qv-step next" type="button" data-step="1"></button>' +
-      "</div>";
+      "</div>" +
+      '<div class="qv-foot"><button class="qv-close" type="button" aria-label="Close preview">Close ✕</button></div>';
     document.body.appendChild(d);
     qv.el = d;
 
