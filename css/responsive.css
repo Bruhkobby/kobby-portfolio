@@ -37,6 +37,11 @@
      (it used to fill the whole screen with an empty top half) */
   .hero { min-height: min(62svh, 32rem); padding-top: 6.5rem; padding-bottom: 3.5rem; }
   .hero-scroll { display: none; }
+  .hero-inner { grid-template-columns: 1fr; gap: 1.8rem; }
+  .hero-photo { order: -1; justify-self: start; width: min(62vw, 15.5rem); max-height: none; border-radius: 18px; }
+  .hero-line { font-size: clamp(3.4rem, 15vw, 6rem); }
+  .hero-line-sub { font-size: clamp(1.4rem, 5.6vw, 2.2rem); }
+  .hero-photo-tag { white-space: nowrap; font-size: 0.6rem; letter-spacing: 0.1em; padding: 0.35rem 0.7rem; }
   .hero-statement { margin-top: 2rem; }
 
   /* Single-column stacked grid — deliberate mobile layout */
@@ -119,9 +124,17 @@
 }
 
 
+/* ---------- Hero portrait on tablets held upright: photo on top, then the name ---------- */
+@media (max-width: 1200px) { .hero-scroll { display: none; } }
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
+  .hero-inner { grid-template-columns: 1fr; gap: 2rem; }
+  .hero-photo { order: -1; justify-self: start; width: min(46vw, 24rem); max-height: none; }
+}
+
 /* ---------- Phones held sideways (short screens) ---------- */
 @media (max-height: 520px) and (orientation: landscape) {
   .hero { min-height: 0; padding-top: 5.5rem; padding-bottom: 2.5rem; }
+  .hero-photo { max-height: calc(100svh - 8rem); }
   .hero-line { font-size: clamp(2.4rem, 8vw, 4.5rem); }
   .hero-line-sub { font-size: clamp(1.1rem, 3.2vw, 2rem); }
   .hero-kicker { margin-bottom: 0.8rem; }

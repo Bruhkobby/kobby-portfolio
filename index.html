@@ -74,8 +74,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=13" />
-  <link rel="stylesheet" href="css/responsive.css?v=11" />
+  <link rel="stylesheet" href="css/style.css?v=15" />
+  <link rel="stylesheet" href="css/responsive.css?v=15" />
   <link rel="stylesheet" href="css/glass.css?v=4" />
   <script src="js/theme.js?v=1"></script>
 </head>
@@ -125,14 +125,23 @@
     <!-- ============ HERO ============ -->
     <section class="hero">
       <div class="hero-inner">
-        <p class="hero-kicker" data-hero-reveal>Portfolio — 2026</p>
-        <h1 class="hero-title">
-          <span class="hero-line" data-hero-reveal>KOBBY</span>
-          <span class="hero-line hero-line-sub" data-hero-reveal>Graphic Designer</span>
-          <span class="hero-line hero-line-sub" data-hero-reveal>&amp; Multimedia Creative</span>
-        </h1>
-        <!-- EDIT ME: your one-line intro statement -->
-        <p class="hero-statement" data-hero-reveal>Visual design, branding and digital experiences crafted with intention.</p>
+        <div class="hero-copy">
+          <p class="hero-kicker" data-hero-reveal>Portfolio — 2026</p>
+          <h1 class="hero-title">
+            <span class="hero-line" data-hero-reveal>KOBBY</span>
+            <span class="hero-line hero-line-sub" data-hero-reveal>Graphic Designer</span>
+            <span class="hero-line hero-line-sub" data-hero-reveal>&amp; Multimedia Creative</span>
+          </h1>
+          <!-- EDIT ME: your one-line intro statement -->
+          <p class="hero-statement" data-hero-reveal>Visual design, branding and digital experiences crafted with intention.</p>
+        </div>
+        <figure class="hero-photo" data-hero-reveal>
+          <picture>
+            <source type="image/webp" srcset="assets/images/kobby-hero-640.webp 640w, assets/images/kobby-hero-960.webp 960w" sizes="(max-width: 768px) 62vw, 36vw" />
+            <img src="assets/images/kobby-hero-960.jpg" srcset="assets/images/kobby-hero-640.jpg 640w, assets/images/kobby-hero-960.jpg 960w" sizes="(max-width: 768px) 62vw, 36vw" width="960" height="1200" alt="Portrait of Kobby wearing glasses and a white shirt, seated in a chair against a dark grey background" fetchpriority="high" decoding="async" />
+          </picture>
+          <figcaption class="hero-photo-tag">Kobby · Accra, Ghana</figcaption>
+        </figure>
       </div>
       <div class="hero-scroll" data-hero-reveal>
         <span class="hero-scroll-line"></span>
