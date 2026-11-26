@@ -38,9 +38,15 @@
   <!-- blog:start -->
   <url>
     <loc>https://bruhkobby.github.io/kobby-portfolio/blog.html</loc>
-    <lastmod>2026-11-23</lastmod>
+    <lastmod>2026-11-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bruhkobby.github.io/kobby-portfolio/blog/pairing-fonts-without-overthinking.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://bruhkobby.github.io/kobby-portfolio/blog/how-to-design-a-flyer-people-read.html</loc>

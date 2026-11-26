@@ -1,6 +1,14 @@
 {
   "posts": [
     {
+      "slug": "pairing-fonts-without-overthinking",
+      "title": "Pairing Fonts Without Overthinking It",
+      "date": "2026-11-26",
+      "category": "Design",
+      "status": "live",
+      "source": "file"
+    },
+    {
       "slug": "how-to-design-a-flyer-people-read",
       "title": "How to Design a Flyer That People Actually Read",
       "date": "2026-11-23",
@@ -54,14 +62,6 @@
       "date": "2026-10-17",
       "category": "Branding",
       "status": "live",
-      "source": "file"
-    },
-    {
-      "slug": "pairing-fonts-without-overthinking",
-      "title": "Pairing Fonts Without Overthinking It",
-      "date": "2026-11-26",
-      "category": "Design",
-      "status": "scheduled",
       "source": "file"
     },
     {
